@@ -1,0 +1,9 @@
+# Ignore everything
+/*
+
+# Except this files
+!.gitignore
+!pom.xml
+
+# Except this folders
+!autotrader-core/
