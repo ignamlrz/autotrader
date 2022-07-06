@@ -1,15 +1,25 @@
 package org.ignamlrz.autotrader.core.model.market;
 
-import org.ignamlrz.autotrader.core.analysis.Analyzable;
-import org.ignamlrz.autotrader.core.analysis.Result;
+import org.ignamlrz.autotrader.core.analysis.indicators.Indicator;
+import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorUtils;
 import org.ignamlrz.autotrader.core.time.Interval;
+import org.springframework.lang.Nullable;
 
-public class BasicChart implements Analyzable {
-    BasicCandlestick[] basicCandlesticks;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class BasicChart {
+    List<BasicCandlestick> basicCandlesticks;
     Interval interval;
 
-    @Override
-    public <T extends BasicChart> Result[] analyze(T chart) {
-        throw new RuntimeException("Not implemented");
+    public List<Float> getData(@Nullable Indicator.Target target) {
+        switch (IndicatorUtils.ofNullable(target)) {
+            case OPEN: return basicCandlesticks.stream().map(BasicCandlestick::getOpen).collect(Collectors.toList());
+            case HIGH: return basicCandlesticks.stream().map(BasicCandlestick::getHigh).collect(Collectors.toList());
+            case LOW: return basicCandlesticks.stream().map(BasicCandlestick::getLow).collect(Collectors.toList());
+            case CLOSE:
+            default:
+                return basicCandlesticks.stream().map(BasicCandlestick::getClose).collect(Collectors.toList());
+        }
     }
 }

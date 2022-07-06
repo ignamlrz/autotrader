@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
+import javax.validation.constraints.Min;
+
 /**
  * Model of a timeframe
  */
@@ -12,13 +14,25 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 @Schema(description = "Timeframe")
 public final class Timeframe {
+
+    /**
+     * Open time on milliseconds
+     */
+    @Schema(description = "Open time on milliseconds")
+    @Min(0)
     @Getter
     private long open;
+
+    /**
+     * Close time on milliseconds
+     */
+    @Schema(description = "Close time on milliseconds", example = "59999")
+    @Min(0)
     @Getter
     private long close;
 
     /**
-     * Constructor of a timeframe
+     * Constructor of a {@link Timeframe}
      *
      * @param open  Open date
      * @param close Close date

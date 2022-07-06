@@ -18,6 +18,7 @@ import javax.validation.constraints.NotNull;
 @Jacksonized
 @Schema(description = "Basic candlestick")
 public class BasicCandlestick {
+
     /**
      * Opening price
      */
@@ -62,7 +63,7 @@ public class BasicCandlestick {
      * Timeframe
      */
     @Schema(description = "Timeframe")
-    @Getter
     @NotNull
+    @Getter
     private Timeframe timeframe;
 }
