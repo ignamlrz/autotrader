@@ -1,4 +1,4 @@
-package org.ignamlrz.autotrader.core.analysis.indicator.macd;
+package org.ignamlrz.autotrader.core.analysis.indicators.macd;
 
 import org.ignamlrz.autotrader.core.analysis.indicators.Indicator;
 import org.junit.jupiter.api.Test;
@@ -27,16 +27,16 @@ class MACDIndicatorTest {
 
         // ...check contain all keys on map of options
         Map<String, Object> optionsMap = indicator.getOptions().toMap();
-        assertTrue(optionsMap.containsKey(MACDOptions.Type.SHORT_PERIOD.name()));
-        assertTrue(optionsMap.containsKey(MACDOptions.Type.LONG_PERIOD.name()));
-        assertTrue(optionsMap.containsKey(MACDOptions.Type.SIGNAL_PERIOD.name()));
-        assertTrue(optionsMap.containsKey(MACDOptions.Type.TARGET.name()));
+        assertTrue(optionsMap.containsKey(MACDIndicatorOptions.Type.SHORT_PERIOD.name()));
+        assertTrue(optionsMap.containsKey(MACDIndicatorOptions.Type.LONG_PERIOD.name()));
+        assertTrue(optionsMap.containsKey(MACDIndicatorOptions.Type.SIGNAL_PERIOD.name()));
+        assertTrue(optionsMap.containsKey(MACDIndicatorOptions.Type.TARGET.name()));
 
         // ...check contain all values on map of options
-        assertEquals(shortPeriod, optionsMap.get(MACDOptions.Type.SHORT_PERIOD.name()));
-        assertEquals(longPeriod, optionsMap.get(MACDOptions.Type.LONG_PERIOD.name()));
-        assertEquals(signalPeriod, optionsMap.get(MACDOptions.Type.SIGNAL_PERIOD.name()));
-        assertEquals(target, optionsMap.get(MACDOptions.Type.TARGET.name()));
+        assertEquals(shortPeriod, optionsMap.get(MACDIndicatorOptions.Type.SHORT_PERIOD.name()));
+        assertEquals(longPeriod, optionsMap.get(MACDIndicatorOptions.Type.LONG_PERIOD.name()));
+        assertEquals(signalPeriod, optionsMap.get(MACDIndicatorOptions.Type.SIGNAL_PERIOD.name()));
+        assertEquals(target, optionsMap.get(MACDIndicatorOptions.Type.TARGET.name()));
     }
 
     @Test
@@ -48,7 +48,7 @@ class MACDIndicatorTest {
 
         // ...build indicator
         assertThrows(IllegalArgumentException.class, () -> createNewMACDIndicator(0, longPeriod, signalPeriod, null));
-        assertThrows(IllegalArgumentException.class, () -> createNewMACDIndicator(shortPeriod, 0, signalPeriod, null));
+        assertThrows(IllegalArgumentException.class, () -> createNewMACDIndicator(shortPeriod, 0, signalPeriod, Indicator.Target.HIGH));
         assertThrows(IllegalArgumentException.class, () -> createNewMACDIndicator(shortPeriod, longPeriod, 0, null));
     }
 
@@ -63,7 +63,7 @@ class MACDIndicatorTest {
      */
     private Indicator createNewMACDIndicator(int shortPeriod, int longPeriod, int signalPeriod, Indicator.Target target) {
         // ...build MACD options
-        MACDOptions options = MACDOptions.builder()
+        MACDIndicatorOptions options = MACDIndicatorOptions.builder()
                 .shortPeriod(shortPeriod)
                 .longPeriod(longPeriod)
                 .signalPeriod(signalPeriod)

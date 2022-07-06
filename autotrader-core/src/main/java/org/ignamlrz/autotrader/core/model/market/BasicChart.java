@@ -12,7 +12,7 @@ public class BasicChart {
     List<BasicCandlestick> basicCandlesticks;
     Interval interval;
 
-    public List<Float> getData(@Nullable Indicator.Target target) {
+    public List<Float> getDataFrom(@Nullable Indicator.Target target) {
         switch (IndicatorUtils.ofNullable(target)) {
             case OPEN: return basicCandlesticks.stream().map(BasicCandlestick::getOpen).collect(Collectors.toList());
             case HIGH: return basicCandlesticks.stream().map(BasicCandlestick::getHigh).collect(Collectors.toList());

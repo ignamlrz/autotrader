@@ -1,6 +1,5 @@
 package org.ignamlrz.autotrader.core.analysis.indicators;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,5 +12,5 @@ public interface IndicatorOutput {
      *
      * @return map of indicator input data
      */
-    Map<String, List<? extends Number>> toMap();
+    Map<String, float[]> toMap();
 }

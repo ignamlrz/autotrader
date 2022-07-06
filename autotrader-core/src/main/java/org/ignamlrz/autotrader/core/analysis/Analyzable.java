@@ -1,7 +1,7 @@
 package org.ignamlrz.autotrader.core.analysis;
 
-import org.ignamlrz.autotrader.core.model.market.BasicChart;
+import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorOutput;
 
 public interface Analyzable {
-    <T extends BasicChart> AnalysisResult analyze(T chart);
+    AnalysisResult analyze(IndicatorOutput output);
 }

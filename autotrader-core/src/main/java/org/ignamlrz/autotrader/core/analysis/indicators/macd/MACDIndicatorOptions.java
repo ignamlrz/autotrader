@@ -1,4 +1,4 @@
-package org.ignamlrz.autotrader.core.analysis.indicator.macd;
+package org.ignamlrz.autotrader.core.analysis.indicators.macd;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -13,11 +13,16 @@ import java.util.Map;
 /**
  * Moving Average Convergence/Divergence indicator options
  */
-public final class MACDOptions implements IndicatorOptions {
+public final class MACDIndicatorOptions implements IndicatorOptions {
 
+    // Enums
     public enum Type {
         SHORT_PERIOD, LONG_PERIOD, SIGNAL_PERIOD, TARGET
     }
+
+    // Static fields
+    static final int MIN_SHORT_PERIOD = 1;
+    static final int MIN_SIGNAL_PERIOD = 1;
 
     /**
      * Short period
@@ -44,14 +49,14 @@ public final class MACDOptions implements IndicatorOptions {
     private final Indicator.Target target;
 
     @Builder
-    private MACDOptions(int shortPeriod, int longPeriod, int signalPeriod, @Nullable Indicator.Target target) {
-        if(shortPeriod < 5) {
+    private MACDIndicatorOptions(int shortPeriod, int longPeriod, int signalPeriod, @Nullable Indicator.Target target) {
+        if(shortPeriod < MIN_SHORT_PERIOD) {
             throw new IllegalArgumentException("Short period can not be lower than 0");
         }
         if(longPeriod <= shortPeriod) {
             throw new IllegalArgumentException("Long period can not be lower or equal than short period");
         }
-        if(signalPeriod < 5) {
+        if(signalPeriod < MIN_SIGNAL_PERIOD) {
             throw new IllegalArgumentException("Short period can not be lower than 0");
         }
         this.shortPeriod = shortPeriod;
