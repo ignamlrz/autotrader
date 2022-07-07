@@ -4,12 +4,14 @@ import org.ignamlrz.autotrader.core.analysis.AnalysisResult;
 import org.ignamlrz.autotrader.core.analysis.indicators.Indicator;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorInput;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorOutput;
-import org.ignamlrz.autotrader.core.analysis.indicators.macd.MACDIndicatorInput;
 import org.ignamlrz.autotrader.core.model.market.BasicChart;
 import org.ignamlrz.autotrader.core.utilities.FloatUtils;
 
 /**
  * Exponential Moving Average indicator
+ *
+ * @see <a href="https://www.investopedia.com/terms/e/ema.asp">investopedia.com</a>
+ * @see <a href="https://tulipindicators.org/ema">tulipindicators.org</a>
  */
 public final class EMAIndicator extends Indicator {
 
@@ -20,25 +22,46 @@ public final class EMAIndicator extends Indicator {
     /**
      * Constructor of the {@link EMAIndicator}
      *
-     * @param options to use on this indicator
-     * @see <a href="https://www.investopedia.com/terms/e/ema.asp">investopedia.com</a>
-     * @see <a href="https://tulipindicators.org/ema">tulipindicators.org</a>
+     * @param options to use
      */
     public EMAIndicator(EMAIndicatorOptions options) {
         super(IDENTIFIER, NAME, TYPE, options);
     }
 
+    /**
+     * Method for get {@link EMAIndicator} options
+     *
+     * @return EMA Indicator options
+     */
     @Override
-    public IndicatorOutput run(IndicatorInput indicatorInput) {
-        EMAIndicatorInput emaInput = (EMAIndicatorInput) indicatorInput;
-        return processEMAIndicator(emaInput);
+    public EMAIndicatorOptions getOptions() {
+        return (EMAIndicatorOptions) this.options;
+    }
+
+    /**
+     * Static method for run an EMA indicator
+     *
+     * @param input Array of values to process
+     * @return an array of results
+     */
+    public static Float[] run(Float[] input, EMAIndicatorOptions options) {
+        EMAIndicatorInput inputData = new EMAIndicatorInput(input);
+        EMAIndicator emaIndicator = new EMAIndicator(options);
+        return ((EMAIndicatorOutput) emaIndicator.run(inputData)).getEma();
+    }
+
+    @Override
+    public <T extends IndicatorInput> IndicatorOutput run(T input) {
+        if (!(input instanceof EMAIndicatorInput)) {
+            throw new IllegalArgumentException("input must be an EMA Indicator Input");
+        }
+        return processEMAIndicator((EMAIndicatorInput) input);
     }
 
     @Override
     public <T extends BasicChart> IndicatorOutput run(T chart) {
-        EMAIndicatorOptions options = (EMAIndicatorOptions) this.options;
-        float[] reals = FloatUtils.arrayOf(chart.getDataFrom(options.getTarget()));
-        MACDIndicatorInput input = new MACDIndicatorInput(reals);
+        Float[] reals = FloatUtils.boxedArrayOf(chart.getDataFrom(getOptions().getTarget()));
+        EMAIndicatorInput input = new EMAIndicatorInput(reals);
         return run(input);
     }
 
@@ -48,30 +71,24 @@ public final class EMAIndicator extends Indicator {
     }
 
     /**
-     * Calculate scaling factor using instantiated period
-     *
-     * @return scaling factor
-     */
-    float getScalingFactor() {
-        EMAIndicatorOptions options = (EMAIndicatorOptions) this.options;
-        float divisor = (float) (options.getPeriod() + 1);
-        return options.getSmothering() / divisor;
-    }
-
-    /**
      * Process an EMA indicator
      *
-     * @param emaInput EMA indicator input
+     * @param input EMA indicator input
      * @return an EMA Indicator output
      */
-    EMAIndicatorOutput processEMAIndicator(EMAIndicatorInput emaInput) {
+    EMAIndicatorOutput processEMAIndicator(EMAIndicatorInput input) {
         float scalingFactor = getScalingFactor();
-        float previousOutput = 0.f;
+        Float previousOutput = null;
 
-        float[] numbers = emaInput.getReals();
-        float[] outputNumbers = new float[numbers.length];
-        for (int i=0; i<numbers.length; i++) {
-            float aux = (i == 0)
+        Float[] numbers = input.getReals();
+        Float[] outputNumbers = new Float[numbers.length];
+        for (int i = 0; i < numbers.length; i++) {
+            if (numbers[i] == null) {
+                outputNumbers[i] = null;
+                continue;
+            }
+
+            float aux = (previousOutput == null)
                     ? numbers[i]
                     : (1 - scalingFactor) * previousOutput + scalingFactor * numbers[i];
             outputNumbers[i] = aux;
@@ -79,6 +96,17 @@ public final class EMAIndicator extends Indicator {
         }
 
         return new EMAIndicatorOutput(outputNumbers);
+    }
+
+    /**
+     * Calculate scaling factor using instantiated period
+     *
+     * @return scaling factor
+     */
+    private float getScalingFactor() {
+        float divisor = (float) (getOptions().getPeriod() + 1);
+        float dividend = getOptions().getSmothering();
+        return dividend / divisor;
     }
 
 }

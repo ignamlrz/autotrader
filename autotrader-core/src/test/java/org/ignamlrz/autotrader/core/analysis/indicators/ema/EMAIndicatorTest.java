@@ -1,25 +1,24 @@
 package org.ignamlrz.autotrader.core.analysis.indicators.ema;
 
 import org.ignamlrz.autotrader.core.analysis.indicators.Indicator;
+import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorUtils;
 import org.junit.jupiter.api.Test;
-import org.springframework.lang.Nullable;
-
-import java.util.Map;
 
 import static org.ignamlrz.autotrader.core.analysis.indicators.ema.EMAIndicatorOptions.MIN_PERIOD;
 import static org.ignamlrz.autotrader.core.analysis.indicators.ema.EMAIndicatorOptions.MIN_SMOTHERING;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class EMAIndicatorTest {
 
     // Static fields
-    private static final float [] predefinedInput = {
+    private static final Float[] predefinedInput = {
             81.59f, 81.06f, 82.87f, 83.00f, 83.61f,
             83.15f, 82.84f, 83.99f, 84.55f, 84.36f,
             85.53f, 86.54f, 86.89f, 87.77f, 87.29f
     };
 
-    private static final float[] expectedOutput = {
+    private static final Float[] expectedEma = {
             81.59f, 81.41f, 81.90f, 82.27f, 82.71f,
             82.86f, 82.85f, 83.23f, 83.67f, 83.90f,
             84.44f, 85.14f, 85.73f, 86.70f, 86.41f
@@ -30,36 +29,29 @@ class EMAIndicatorTest {
         // ...given
         int period = MIN_PERIOD;
         int smothering = MIN_SMOTHERING;
-        Indicator.Target target = Indicator.Target.CLOSE;
 
         // ...build indicator
-        Indicator indicator = createNewEMAIndicator(period, smothering, null);
+        EMAIndicator indicator = createNewEMAIndicator(period, smothering);
 
         // ...check generic properties of this instance
         assertEquals(EMAIndicator.IDENTIFIER, indicator.getIdentifier());
         assertEquals(EMAIndicator.NAME, indicator.getName());
         assertEquals(EMAIndicator.TYPE, indicator.getType());
 
-        // ...check contain all keys on map of options
-        Map<String, Object> optionsMap = indicator.getOptions().toMap();
-        assertTrue(optionsMap.containsKey(EMAIndicatorOptions.Type.PERIOD.name()));
-        assertTrue(optionsMap.containsKey(EMAIndicatorOptions.Type.SMOTHERING.name()));
-        assertTrue(optionsMap.containsKey(EMAIndicatorOptions.Type.TARGET.name()));
-
-        // ...check contain all values on map of options
-        assertEquals(period, optionsMap.get(EMAIndicatorOptions.Type.PERIOD.name()));
-        assertEquals(smothering, optionsMap.get(EMAIndicatorOptions.Type.SMOTHERING.name()));
-        assertEquals(target, optionsMap.get(EMAIndicatorOptions.Type.TARGET.name()));
+        // ...check options
+        assertEquals(period, indicator.getOptions().getPeriod());
+        assertEquals(smothering, indicator.getOptions().getSmothering());
+        assertEquals(IndicatorUtils.ofNullable(null), indicator.getOptions().getTarget());
     }
 
     @Test
     void testShouldNotBeCreated() {
         // ...try build incorrect indicators
         assertThrows(IllegalArgumentException.class, () ->
-                createNewEMAIndicator(MIN_PERIOD - 1, MIN_SMOTHERING, Indicator.Target.OPEN)
+                createNewEMAIndicator(MIN_PERIOD - 1, MIN_SMOTHERING)
         );
         assertThrows(IllegalArgumentException.class, () ->
-                createNewEMAIndicator(MIN_PERIOD, MIN_SMOTHERING - 1, Indicator.Target.HIGH)
+                createNewEMAIndicator(MIN_PERIOD, MIN_SMOTHERING - 1)
         );
     }
 
@@ -71,43 +63,32 @@ class EMAIndicatorTest {
         float allowedDelta = 0.3f;
 
         // ...build indicator
-        Indicator indicator = createNewEMAIndicator(period, smothering, null);
+        Indicator indicator = createNewEMAIndicator(period, smothering);
 
         // ...use known IndicatorInput and IndicatorOutput
-        EMAIndicatorInput predefinedInput = new EMAIndicatorInput(EMAIndicatorTest.predefinedInput);
-        EMAIndicatorOutput expectedOutput = new EMAIndicatorOutput(EMAIndicatorTest.expectedOutput);
+        EMAIndicatorInput input = new EMAIndicatorInput(EMAIndicatorTest.predefinedInput);
 
         // ...run indicator
-        EMAIndicatorOutput obtainedOutput = (EMAIndicatorOutput) indicator.run(predefinedInput);
+        EMAIndicatorOutput obtainedOutput = (EMAIndicatorOutput) indicator.run(input);
 
         // ...check obtain same results as known output
-        assertEquals(expectedOutput.getEma().length, obtainedOutput.getEma().length);
-        for(int i = 0; i < expectedOutput.getEma().length; i++) {
+        assertEquals(expectedEma.length, obtainedOutput.getEma().length);
+        for (int i = 0; i < expectedEma.length; i++) {
             // ...check each output data
-            float expectedReal = expectedOutput.getEma()[i];
-            float obtainedReal = obtainedOutput.getEma()[i];
-            assertEquals(expectedReal, obtainedReal, allowedDelta);
+            assertEquals(expectedEma[i], obtainedOutput.getEma()[i], allowedDelta);
         }
-
-        // ...check input map
-        Map<String, float[]> inputMap = predefinedInput.toMap();
-        assertEquals(predefinedInput.getReals().length, inputMap.get(EMAIndicatorInput.Type.REAL.name()).length);
-
-        // ...check output map
-        Map<String, float[]> outputMap = obtainedOutput.toMap();
-        assertEquals(expectedOutput.getEma().length, outputMap.get(EMAIndicatorOutput.Type.EMA.name()).length);
     }
 
     /**
      * Method for create a new EMA Indicator
      *
-     * @param period  Period
-     * @param target       Target
+     * @param period     Period
+     * @param smothering Smothering
      * @return a new EMA indicator
      */
-    private Indicator createNewEMAIndicator(int period, int smothering, @Nullable Indicator.Target target) {
+    private EMAIndicator createNewEMAIndicator(int period, int smothering) {
         // ...build EMA options
-        EMAIndicatorOptions options = new EMAIndicatorOptions(period, smothering, target);
+        EMAIndicatorOptions options = new EMAIndicatorOptions(period, smothering, null);
 
         // ...create the indicator
         return new EMAIndicator(options);

@@ -6,18 +6,10 @@ import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorOptions;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorUtils;
 import org.springframework.lang.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Exponential Moving Average indicator options
  */
 public final class EMAIndicatorOptions implements IndicatorOptions {
-
-    // Enums
-    public enum Type {
-        PERIOD, SMOTHERING, TARGET
-    }
 
     // Static fields
     static final int MIN_PERIOD = 1;
@@ -57,14 +49,5 @@ public final class EMAIndicatorOptions implements IndicatorOptions {
         this.period = period;
         this.smothering = smothering;
         this.target = IndicatorUtils.ofNullable(target);
-    }
-
-    @Override
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put(Type.PERIOD.name(), period);
-        map.put(Type.SMOTHERING.name(), smothering);
-        map.put(Type.TARGET.name(), target);
-        return map;
     }
 }

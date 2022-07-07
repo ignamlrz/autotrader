@@ -13,7 +13,7 @@ public interface IndicatorProcessable {
      * @param input Indicator input data
      * @return Indicator output data
      */
-    IndicatorOutput run(IndicatorInput input);
+    <T extends IndicatorInput> IndicatorOutput run(T input);
 
     /**
      * Method which add the ability to run an indicator

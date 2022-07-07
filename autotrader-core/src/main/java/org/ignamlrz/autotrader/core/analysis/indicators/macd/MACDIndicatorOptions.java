@@ -1,77 +1,76 @@
 package org.ignamlrz.autotrader.core.analysis.indicators.macd;
 
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Value;
 import org.ignamlrz.autotrader.core.analysis.indicators.Indicator;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorOptions;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorUtils;
 import org.springframework.lang.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Moving Average Convergence/Divergence indicator options
  */
+@Value
 public final class MACDIndicatorOptions implements IndicatorOptions {
-
-    // Enums
-    public enum Type {
-        SHORT_PERIOD, LONG_PERIOD, SIGNAL_PERIOD, TARGET
-    }
 
     // Static fields
     static final int MIN_SHORT_PERIOD = 1;
     static final int MIN_SIGNAL_PERIOD = 1;
+    static final int DEFAULT_SMOTHERING = 2;
+    static final int MIN_SMOTHERING = 1;
 
     /**
      * Short period
      */
-    @Getter
-    private final int shortPeriod;
+    int shortPeriod;
 
     /**
      * Long period
      */
-    @Getter
-    private final int longPeriod;
+    int longPeriod;
 
     /**
      * Signal period
      */
-    @Getter
-    private final int signalPeriod;
+    int signalPeriod;
 
     /**
      * Indicator target
      */
-    @Getter
-    private final Indicator.Target target;
+    int smothering;
 
+    /**
+     * Indicator target
+     */
+    Indicator.Target target;
+
+    /**
+     * Constructor of a MACD Indicator Options
+     *
+     * @param shortPeriod  Short period
+     * @param longPeriod   Long period
+     * @param signalPeriod Signal period
+     * @param smothering   Smothering applied on all EMAs
+     * @param target       Target of this indicator
+     */
     @Builder
-    private MACDIndicatorOptions(int shortPeriod, int longPeriod, int signalPeriod, @Nullable Indicator.Target target) {
-        if(shortPeriod < MIN_SHORT_PERIOD) {
+    public MACDIndicatorOptions(int shortPeriod, int longPeriod, int signalPeriod, int smothering, @Nullable Indicator.Target target) {
+        if (shortPeriod < MIN_SHORT_PERIOD) {
             throw new IllegalArgumentException("Short period can not be lower than 0");
         }
-        if(longPeriod <= shortPeriod) {
+        if (longPeriod <= shortPeriod) {
             throw new IllegalArgumentException("Long period can not be lower or equal than short period");
         }
-        if(signalPeriod < MIN_SIGNAL_PERIOD) {
+        if (signalPeriod < MIN_SIGNAL_PERIOD) {
             throw new IllegalArgumentException("Short period can not be lower than 0");
+        }
+        if (smothering < MIN_SMOTHERING) {
+            throw new IllegalArgumentException("Smothering can not be lower than 0");
         }
         this.shortPeriod = shortPeriod;
         this.longPeriod = longPeriod;
         this.signalPeriod = signalPeriod;
+        this.smothering = smothering;
         this.target = IndicatorUtils.ofNullable(target);
-    }
-
-    @Override
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put(Type.SHORT_PERIOD.name(), shortPeriod);
-        map.put(Type.LONG_PERIOD.name(), longPeriod);
-        map.put(Type.SIGNAL_PERIOD.name(), signalPeriod);
-        map.put(Type.TARGET.name(), target);
-        return map;
     }
 }
