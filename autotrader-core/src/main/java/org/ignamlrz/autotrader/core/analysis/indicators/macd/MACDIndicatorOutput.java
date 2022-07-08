@@ -1,36 +1,42 @@
 package org.ignamlrz.autotrader.core.analysis.indicators.macd;
 
-import lombok.Getter;
+import lombok.Value;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorOutput;
 
 /**
  * Moving Average Convergence/Divergence indicator output
  */
-public final class MACDIndicatorOutput implements IndicatorOutput {
+@Value
+public class MACDIndicatorOutput implements IndicatorOutput {
+
+    // ========================================================
+    // = INSTANCE FIELDS
+    // ========================================================
 
     /**
      * MACD
      */
-    @Getter
-    private final Float[] macd;
+    Float[] macd;
 
     /**
      * MACD signal
      */
-    @Getter
-    private final Float[] macdSignal;
+    Float[] macdSignal;
 
     /**
      * MACD histogram
      */
-    @Getter
-    private final Float[] macdHistogram;
+    Float[] macdHistogram;
+
+    // ========================================================
+    // = CONSTRUCTORS
+    // ========================================================
 
     /**
      * Constructor of the {@link MACDIndicatorOutput}
      *
-     * @param macd MACD value array
-     * @param macdSignal MACD signal array
+     * @param macd          MACD value array
+     * @param macdSignal    MACD signal array
      * @param macdHistogram MACD histogram array
      */
     public MACDIndicatorOutput(Float[] macd, Float[] macdSignal, Float[] macdHistogram) {

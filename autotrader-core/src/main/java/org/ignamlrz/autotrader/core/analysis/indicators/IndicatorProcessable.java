@@ -8,17 +8,17 @@ import org.ignamlrz.autotrader.core.model.market.BasicChart;
 public interface IndicatorProcessable {
 
     /**
-     * Method which add the ability to run an indicator
+     * Method for run indicator
      *
-     * @param input Indicator input data
+     * @param input Indicator input data to process
      * @return Indicator output data
      */
     <T extends IndicatorInput> IndicatorOutput run(T input);
 
     /**
-     * Method which add the ability to run an indicator
+     * Method for run indicator
      *
-     * @param chart Chart as input data
+     * @param chart Chart to process
      * @return Indicator output data
      */
     <T extends BasicChart> IndicatorOutput run(T chart);

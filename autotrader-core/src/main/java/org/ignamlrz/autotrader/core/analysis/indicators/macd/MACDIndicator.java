@@ -1,11 +1,14 @@
 package org.ignamlrz.autotrader.core.analysis.indicators.macd;
 
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 import org.ignamlrz.autotrader.core.analysis.AnalysisResult;
 import org.ignamlrz.autotrader.core.analysis.indicators.Indicator;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorInput;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorOutput;
 import org.ignamlrz.autotrader.core.analysis.indicators.ema.EMAIndicator;
 import org.ignamlrz.autotrader.core.analysis.indicators.ema.EMAIndicatorOptions;
+import org.ignamlrz.autotrader.core.analysis.indicators.ema.EMAIndicatorOutput;
 import org.ignamlrz.autotrader.core.model.market.BasicChart;
 import org.ignamlrz.autotrader.core.utilities.FloatUtils;
 
@@ -15,11 +18,30 @@ import org.ignamlrz.autotrader.core.utilities.FloatUtils;
  * @see <a href="https://www.investopedia.com/terms/m/macd.asp">investopedia.com</a>
  * @see <a href="https://tulipindicators.org/macd">tulipindicators.org</a>
  */
-public final class MACDIndicator extends Indicator {
+@Value
+@EqualsAndHashCode(callSuper = true)
+public class MACDIndicator extends Indicator {
+
+    // ========================================================
+    // = STATIC FIELDS
+    // ========================================================
 
     static final String IDENTIFIER = "macd";
     static final String NAME = "Moving Average Convergence/Divergence";
     static final Indicator.Type TYPE = Type.INDICATOR;
+
+    // ========================================================
+    // = INSTANCE FIELDS
+    // ========================================================
+
+    /**
+     * MACD Indicator options
+     */
+    MACDIndicatorOptions options;
+
+    // ========================================================
+    // = CONSTRUCTORS
+    // ========================================================
 
     /**
      * Constructor of the {@link MACDIndicator}
@@ -27,17 +49,20 @@ public final class MACDIndicator extends Indicator {
      * @param options to use
      */
     public MACDIndicator(MACDIndicatorOptions options) {
-        super(IDENTIFIER, NAME, TYPE, options);
+        super(IDENTIFIER, NAME, TYPE);
+        this.options = options;
     }
 
-    /**
-     * Method for get {@link MACDIndicator} options
-     *
-     * @return MACD Indicator Options
-     */
+    // ========================================================
+    // = OVERRIDE METHODS
+    // ========================================================
+
     @Override
-    public MACDIndicatorOptions getOptions() {
-        return (MACDIndicatorOptions) this.options;
+    public AnalysisResult analyze(IndicatorOutput output) {
+        if (!(output instanceof MACDIndicatorOutput)) {
+            throw new IllegalArgumentException("output must be an MACD Indicator Output");
+        }
+        throw new RuntimeException("Not implemented yet");
     }
 
     @Override
@@ -46,20 +71,19 @@ public final class MACDIndicator extends Indicator {
             throw new IllegalArgumentException("input must be an MACD Indicator Input");
         }
 
-        return processMACDIndicator((MACDIndicatorInput) input);
+        return macd((MACDIndicatorInput) input);
     }
 
     @Override
     public <T extends BasicChart> IndicatorOutput run(T chart) {
-        Float[] reals = FloatUtils.boxedArrayOf(chart.getDataFrom(getOptions().getTarget()));
+        Float[] reals = FloatUtils.arrayOf(chart.getDataFrom(getOptions().getTarget()));
         MACDIndicatorInput input = new MACDIndicatorInput(reals);
         return run(input);
     }
 
-    @Override
-    public AnalysisResult analyze(IndicatorOutput output) {
-        throw new RuntimeException("Not implemented yet");
-    }
+    // ========================================================
+    // = PRIVATE METHODS
+    // ========================================================
 
     /**
      * Process an MACD indicator
@@ -67,34 +91,22 @@ public final class MACDIndicator extends Indicator {
      * @param input MACD indicator input
      * @return an MACD Indicator output
      */
-    MACDIndicatorOutput processMACDIndicator(MACDIndicatorInput input) {
-        int length = input.getReals().length;
-        Float[] macd = new Float[length];
-        Float[] histogram = new Float[length];
-
+    private MACDIndicatorOutput macd(MACDIndicatorInput input) {
         // ...calculate short and long EMA
-        Float[] shortPeriod = processEMAIndicator(input.getReals(), getOptions().getShortPeriod());
-        Float[] longPeriod = processEMAIndicator(input.getReals(), getOptions().getLongPeriod());
+        EMAIndicatorOutput shortOutput = ema(input.getReals(), getOptions().getShortPeriod());
+        EMAIndicatorOutput longOutput = ema(input.getReals(), getOptions().getLongPeriod());
 
-        // ...calculate macd
-        for (int i = 0; i < length; i++) {
-            macd[i] = shortPeriod[i] - longPeriod[i];
-        }
+        // Calculate macd
+        Float[] macd = FloatUtils.subtract(shortOutput.getEma(), longOutput.getEma());
 
-        // ...lower than longPeriod are marked as invalid
-        for (int i = 0; i < getOptions().getLongPeriod() - 1; i++) {
-            macd[i] = null;
-        }
+        // ...values before longPeriod are marked as invalid
+        FloatUtils.invalidateBefore(macd, getOptions().getLongPeriod() - 1);
 
         // ...calculate signal
-        Float[] signal = processEMAIndicator(macd, getOptions().getSignalPeriod());
-
+        Float[] signal = ema(macd, getOptions().getSignalPeriod()).getEma();
 
         // ...calculate histogram
-        for (int i = 0; i < length; i++) {
-            if(signal[i] == null || macd[i] == null)    histogram[i] = null;
-            else  histogram[i] = macd[i] - signal[i];
-        }
+        Float[] histogram = FloatUtils.subtract(macd, signal);
 
         return new MACDIndicatorOutput(macd, signal, histogram);
     }
@@ -106,8 +118,14 @@ public final class MACDIndicator extends Indicator {
      * @param period Period to process
      * @return an array of results
      */
-    Float[] processEMAIndicator(Float[] input, int period) {
-        EMAIndicatorOptions options = new EMAIndicatorOptions(period, getOptions().getTarget());
+    EMAIndicatorOutput ema(Float[] input, int period) {
+        // ...build options
+        EMAIndicatorOptions options = EMAIndicatorOptions.builder()
+                .period(period)
+                .smothering(getOptions().getSmothering())
+                .build();
+
+        // ...run indicator
         return EMAIndicator.run(input, options);
     }
 }

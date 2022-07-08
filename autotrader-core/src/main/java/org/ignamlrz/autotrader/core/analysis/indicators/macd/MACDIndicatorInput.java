@@ -1,18 +1,26 @@
 package org.ignamlrz.autotrader.core.analysis.indicators.macd;
 
-import lombok.Getter;
+import lombok.Value;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorInput;
 
 /**
  * Moving Average Convergence/Divergence indicator input
  */
-public final class MACDIndicatorInput implements IndicatorInput {
+@Value
+public class MACDIndicatorInput implements IndicatorInput {
+
+    // ========================================================
+    // = INSTANCE FIELDS
+    // ========================================================
 
     /**
      * Array of numbers
      */
-    @Getter
-    private final Float[] reals;
+    Float[] reals;
+
+    // ========================================================
+    // = CONSTRUCTORS
+    // ========================================================
 
     /**
      * Constructor of the {@link MACDIndicatorInput}

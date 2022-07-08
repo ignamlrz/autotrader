@@ -1,4 +1,4 @@
-package org.ignamrlz.autotrader.binance.models.market;
+package org.ignamlrz.autotrader.binance.models.market;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;

@@ -1,18 +1,26 @@
 package org.ignamlrz.autotrader.core.analysis.indicators.ema;
 
-import lombok.Getter;
+import lombok.Value;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorInput;
 
 /**
  * Exponential Moving Average indicator input
  */
-public final class EMAIndicatorInput implements IndicatorInput {
+@Value
+public class EMAIndicatorInput implements IndicatorInput {
+
+    // ========================================================
+    // = INSTANCE FIELDS
+    // ========================================================
 
     /**
      * Array of numbers
      */
-    @Getter
-    private final Float[] reals;
+    Float[] reals;
+
+    // ========================================================
+    // = CONSTRUCTORS
+    // ========================================================
 
     /**
      * Constructor of the {@link EMAIndicatorInput}

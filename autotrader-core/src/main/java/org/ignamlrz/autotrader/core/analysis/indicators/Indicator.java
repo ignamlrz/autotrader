@@ -39,21 +39,21 @@ public abstract class Indicator implements Analyzable, IndicatorProcessable {
     protected final Type type;
 
     /**
-     * Indicator options
-     */
-    protected final IndicatorOptions options;
-
-    /**
      * Constructor of a {@link Indicator}
      *
      * @param identifier  Indicator identifier
      * @param name Indicator name
      * @param type Indicator type
      */
-    protected Indicator(String identifier, String name, Type type, IndicatorOptions options) {
+    protected Indicator(String identifier, String name, Type type) {
         this.identifier = identifier;
         this.name = name;
         this.type = type;
-        this.options = options;
     }
+
+    /**
+     * Method for get an {@link IndicatorOptions}
+     * @return an {@link IndicatorOptions}
+     */
+    public abstract IndicatorOptions getOptions();
 }
