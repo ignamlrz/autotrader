@@ -1,5 +1,6 @@
 package org.ignamlrz.autotrader.core.analysis.indicators.macd;
 
+import org.hamcrest.CoreMatchers;
 import org.ignamlrz.autotrader.core.analysis.indicators.Indicator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,7 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.ignamlrz.autotrader.core.analysis.indicators.IndicatorTests.*;
+import static org.ignamlrz.autotrader.core.analysis.indicators.macd.MACDIndicator.INPUT_ERROR_MSG;
 import static org.ignamlrz.autotrader.core.analysis.indicators.macd.MACDIndicatorOptions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,6 +38,22 @@ class MACDIndicatorTest {
         assertEquals(options.getTarget(), indicator.getOptions().getTarget());
     }
 
+    @Test
+    void testShouldNotBeCreatedForAnotherInput() {
+        // ...given
+        MACDIndicator indicator = new MACDIndicator(MACDIndicatorOptions.builder()
+                .shortPeriod(MIN_SHORT_PERIOD)
+                .longPeriod(MIN_SHORT_PERIOD + 1)
+                .signalPeriod(MIN_SIGNAL_PERIOD)
+                .smothering(MIN_SMOTHERING)
+                .build());
+
+        // ...build indicator
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> indicator.run(emaInputs));
+
+        assertThat(ex.getMessage(), CoreMatchers.containsString(INPUT_ERROR_MSG));
+    }
+
     @ParameterizedTest
     @MethodSource(value = "invalidArgs")
     void testShouldNotBeCreated(int shortPeriod, int longPeriod, int signalPeriod, int smothering, String msg) {
@@ -43,7 +62,7 @@ class MACDIndicatorTest {
                 createNewMACDIndicator(shortPeriod, longPeriod, signalPeriod, smothering)
         );
 
-        assertTrue(ex.getMessage().contains(msg));
+        assertThat(ex.getMessage(), CoreMatchers.containsString(msg));
     }
 
     @Test
@@ -92,6 +111,24 @@ class MACDIndicatorTest {
     private MACDIndicator createNewMACDIndicator(int shortPeriod, int longPeriod, int signalPeriod, int smothering) {
         // ...build MACD options
         MACDIndicatorOptions options = new MACDIndicatorOptions(shortPeriod, longPeriod, signalPeriod, smothering, null);
+
+        // ...create the indicator
+        return new MACDIndicator(options);
+    }
+
+    /**
+     * Method for create a new MACD Indicator
+     *
+     * @return a new MACD indicator
+     */
+    private MACDIndicator createBasicMACDIndicator() {
+        // ...build MACD options
+        MACDIndicatorOptions options = new MACDIndicatorOptions(
+                MIN_SHORT_PERIOD,
+                MIN_SHORT_PERIOD + 1,
+                MIN_SIGNAL_PERIOD, MIN_SMOTHERING,
+                null
+        );
 
         // ...create the indicator
         return new MACDIndicator(options);

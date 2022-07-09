@@ -30,6 +30,10 @@ public class MACDIndicator extends Indicator {
     static final String NAME = "Moving Average Convergence/Divergence";
     static final Indicator.Type TYPE = Type.INDICATOR;
 
+    // Error messages
+    static final String INPUT_ERROR_MSG = "input must be an MACD Indicator Input";
+    static final String OUTPUT_ERROR_MSG = "output must be an MACD Indicator Output";
+
     // ========================================================
     // = INSTANCE FIELDS
     // ========================================================
@@ -60,7 +64,7 @@ public class MACDIndicator extends Indicator {
     @Override
     public AnalysisResult analyze(IndicatorOutput output) {
         if (!(output instanceof MACDIndicatorOutput)) {
-            throw new IllegalArgumentException("output must be an MACD Indicator Output");
+            throw new IllegalArgumentException(OUTPUT_ERROR_MSG);
         }
         throw new RuntimeException("Not implemented yet");
     }
@@ -68,7 +72,7 @@ public class MACDIndicator extends Indicator {
     @Override
     public <T extends IndicatorInput> IndicatorOutput run(T input) {
         if (!(input instanceof MACDIndicatorInput)) {
-            throw new IllegalArgumentException("input must be an MACD Indicator Input");
+            throw new IllegalArgumentException(INPUT_ERROR_MSG);
         }
 
         return macd((MACDIndicatorInput) input);
