@@ -1,59 +1,77 @@
 package org.ignamlrz.autotrader.core.analysis.indicators;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.ignamlrz.autotrader.core.analysis.Analyzable;
+import org.ignamlrz.autotrader.core.analysis.indicators.ema.EMAIndicator;
+import org.ignamlrz.autotrader.core.analysis.indicators.macd.MACDIndicator;
+import org.ignamlrz.autotrader.core.annotations.IndicatorInfo;
+import org.ignamlrz.autotrader.core.utilities.ClassLoaderUtils;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Abstract indicator
  */
-@Data
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
+        property = "type"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = EMAIndicator.class, name = IndicatorType.EMA),
+        @JsonSubTypes.Type(value = MACDIndicator.class, name = IndicatorType.MACD)
+})
 public abstract class Indicator implements Analyzable, IndicatorProcessable {
+
+    // ========================================================
+    // = GENERIC ENUMS
+    // ========================================================
 
     /**
      * Enum indicating type of indicators
      */
-    public enum Type {
-        SIMPLE, INDICATOR, MATH, OVERLAY
+    public enum Category {
     }
 
-    /**
-     * Enum indicating target of an indicator
-     */
-    public enum Target {
-        OPEN, CLOSE, HIGH, LOW
-    }
-
-    /**
-     * Indicator identifier
-     */
-    protected final String identifier;
-
-    /**
-     * Indicator name
-     */
-    protected final String name;
-
-    /**
-     * Indicator type
-     */
-    protected final Type type;
-
-    /**
-     * Constructor of a {@link Indicator}
-     *
-     * @param identifier  Indicator identifier
-     * @param name Indicator name
-     * @param type Indicator type
-     */
-    protected Indicator(String identifier, String name, Type type) {
-        this.identifier = identifier;
-        this.name = name;
-        this.type = type;
-    }
+    // ========================================================
+    // = GETTERS
+    // ========================================================
 
     /**
      * Method for get an {@link IndicatorOptions}
+     *
      * @return an {@link IndicatorOptions}
      */
     public abstract IndicatorOptions getOptions();
+
+    // ========================================================
+    // = METHODS
+    // ========================================================
+
+    /**
+     * Retrieve Indicator Metadata
+     *
+     * @return indicator metadata
+     */
+    public final IndicatorInfo metadata() {
+        return this.getClass().getAnnotation(IndicatorInfo.class);
+    }
+
+    // ========================================================
+    // = STATIC METHODS
+    // ========================================================
+
+    /**
+     * Method for find all Indicators
+     *
+     * @return a set of indicator metadata
+     */
+    public static Set<IndicatorInfo> findAll() {
+        return ClassLoaderUtils.findAllClasses(Indicator.class.getPackage().toString()).stream()
+                .filter(aClass -> aClass.getAnnotation(IndicatorInfo.class) != null)
+                .map(aClass -> (IndicatorInfo) aClass.getAnnotation(IndicatorInfo.class))
+                .collect(Collectors.toSet());
+    }
 }

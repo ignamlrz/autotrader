@@ -1,12 +1,16 @@
 package org.ignamlrz.autotrader.core.analysis.indicators.ema;
 
-import lombok.Value;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorInput;
+import org.ignamlrz.autotrader.core.utilities.conversion.ConversionUtils;
+
+import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
 /**
  * Exponential Moving Average indicator input
  */
-@Value
 public class EMAIndicatorInput implements IndicatorInput {
 
     // ========================================================
@@ -14,9 +18,9 @@ public class EMAIndicatorInput implements IndicatorInput {
     // ========================================================
 
     /**
-     * Array of numbers
+     * Real numbers
      */
-    Float[] reals;
+    private final Float[] reals;
 
     // ========================================================
     // = CONSTRUCTORS
@@ -27,8 +31,30 @@ public class EMAIndicatorInput implements IndicatorInput {
      *
      * @param reals an array of numbers
      */
-    public EMAIndicatorInput(Float[] reals) {
-        this.reals = reals;
+    @JsonCreator
+    public EMAIndicatorInput(@JsonProperty("reals") @NotNull Float[] reals) {
+        this.reals = Optional.of(reals).get();
     }
 
+    // ========================================================
+    // = GETTERS
+    // ========================================================
+
+    /**
+     * Getter of reals
+     *
+     * @return reals
+     */
+    public Float[] getReals() {
+        return this.reals;
+    }
+
+    // ========================================================
+    // = OVERRIDE METHODS
+    // ========================================================
+
+    @Override
+    public String toString() {
+        return ConversionUtils.toJson(this);
+    }
 }

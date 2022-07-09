@@ -94,6 +94,7 @@
         </plugins>
     </build>
 
+    <!-- Dependencies -->
     <dependencies>
         <!-- Spring Boot Test -->
         <dependency>

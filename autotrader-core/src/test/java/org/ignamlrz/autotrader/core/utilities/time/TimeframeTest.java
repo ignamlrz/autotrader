@@ -1,5 +1,8 @@
-package org.ignamlrz.autotrader.core.time;
+package org.ignamlrz.autotrader.core.utilities.time;
 
+import org.ignamlrz.autotrader.core.utilities.time.Interval;
+import org.ignamlrz.autotrader.core.utilities.time.Timeframe;
+import org.ignamlrz.autotrader.core.utilities.time.TimeframeUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;

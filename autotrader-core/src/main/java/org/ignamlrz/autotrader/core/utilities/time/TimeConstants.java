@@ -1,4 +1,4 @@
-package org.ignamlrz.autotrader.core.time;
+package org.ignamlrz.autotrader.core.utilities.time;
 
 /**
  * Constants for use on package Time

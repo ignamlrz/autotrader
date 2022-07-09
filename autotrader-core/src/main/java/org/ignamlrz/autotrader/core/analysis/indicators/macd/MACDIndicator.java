@@ -1,16 +1,24 @@
 package org.ignamlrz.autotrader.core.analysis.indicators.macd;
 
-import lombok.EqualsAndHashCode;
-import lombok.Value;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.ignamlrz.autotrader.core.analysis.AnalysisResult;
 import org.ignamlrz.autotrader.core.analysis.indicators.Indicator;
+import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorCategory;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorInput;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorOutput;
 import org.ignamlrz.autotrader.core.analysis.indicators.ema.EMAIndicator;
 import org.ignamlrz.autotrader.core.analysis.indicators.ema.EMAIndicatorOptions;
 import org.ignamlrz.autotrader.core.analysis.indicators.ema.EMAIndicatorOutput;
+import org.ignamlrz.autotrader.core.annotations.IndicatorInfo;
 import org.ignamlrz.autotrader.core.model.market.BasicChart;
 import org.ignamlrz.autotrader.core.utilities.FloatUtils;
+import org.ignamlrz.autotrader.core.utilities.conversion.ConversionUtils;
+
+import javax.validation.constraints.NotNull;
+import java.util.Optional;
+
+import static org.ignamlrz.autotrader.core.analysis.indicators.IndicatorType.MACD;
 
 /**
  * Moving Average Convergence/Divergence indicator
@@ -18,17 +26,12 @@ import org.ignamlrz.autotrader.core.utilities.FloatUtils;
  * @see <a href="https://www.investopedia.com/terms/m/macd.asp">investopedia.com</a>
  * @see <a href="https://tulipindicators.org/macd">tulipindicators.org</a>
  */
-@Value
-@EqualsAndHashCode(callSuper = true)
+@IndicatorInfo(identifier = MACD, name = "Moving Average Convergence/Divergence", type = IndicatorCategory.INDICATOR)
 public class MACDIndicator extends Indicator {
 
     // ========================================================
     // = STATIC FIELDS
     // ========================================================
-
-    static final String IDENTIFIER = "macd";
-    static final String NAME = "Moving Average Convergence/Divergence";
-    static final Indicator.Type TYPE = Type.INDICATOR;
 
     // Error messages
     static final String INPUT_ERROR_MSG = "input must be an MACD Indicator Input";
@@ -48,13 +51,22 @@ public class MACDIndicator extends Indicator {
     // ========================================================
 
     /**
-     * Constructor of the {@link MACDIndicator}
+     * Constructor of {@link MACDIndicator}
      *
      * @param options to use
      */
-    public MACDIndicator(MACDIndicatorOptions options) {
-        super(IDENTIFIER, NAME, TYPE);
-        this.options = options;
+    @JsonCreator
+    public MACDIndicator(@JsonProperty("options") @NotNull MACDIndicatorOptions options) {
+        this.options = Optional.of(options).get();
+    }
+
+    // ========================================================
+    // = GETTERS
+    // ========================================================
+
+    @Override
+    public MACDIndicatorOptions getOptions() {
+        return options;
     }
 
     // ========================================================
@@ -80,9 +92,14 @@ public class MACDIndicator extends Indicator {
 
     @Override
     public <T extends BasicChart> IndicatorOutput run(T chart) {
-        Float[] reals = FloatUtils.arrayOf(chart.getDataFrom(getOptions().getTarget()));
+        Float[] reals = FloatUtils.arrayOf(chart.getDataFrom(this.options.getTarget()));
         MACDIndicatorInput input = new MACDIndicatorInput(reals);
         return run(input);
+    }
+
+    @Override
+    public String toString() {
+        return ConversionUtils.toJson(this);
     }
 
     // ========================================================
@@ -97,17 +114,17 @@ public class MACDIndicator extends Indicator {
      */
     private MACDIndicatorOutput macd(MACDIndicatorInput input) {
         // ...calculate short and long EMA
-        EMAIndicatorOutput shortOutput = ema(input.getReals(), getOptions().getShortPeriod());
-        EMAIndicatorOutput longOutput = ema(input.getReals(), getOptions().getLongPeriod());
+        EMAIndicatorOutput shortOutput = ema(input.getReals(), this.options.getShortPeriod());
+        EMAIndicatorOutput longOutput = ema(input.getReals(), this.options.getLongPeriod());
 
         // Calculate macd
         Float[] macd = FloatUtils.subtract(shortOutput.getEma(), longOutput.getEma());
 
         // ...values before longPeriod are marked as invalid
-        FloatUtils.invalidateBefore(macd, getOptions().getLongPeriod() - 1);
+        FloatUtils.invalidateBefore(macd, this.options.getLongPeriod() - 1);
 
         // ...calculate signal
-        Float[] signal = ema(macd, getOptions().getSignalPeriod()).getEma();
+        Float[] signal = ema(macd, this.options.getSignalPeriod()).getEma();
 
         // ...calculate histogram
         Float[] histogram = FloatUtils.subtract(macd, signal);
@@ -123,13 +140,7 @@ public class MACDIndicator extends Indicator {
      * @return an array of results
      */
     EMAIndicatorOutput ema(Float[] input, int period) {
-        // ...build options
-        EMAIndicatorOptions options = EMAIndicatorOptions.builder()
-                .period(period)
-                .smothering(getOptions().getSmothering())
-                .build();
-
-        // ...run indicator
+        EMAIndicatorOptions options = new EMAIndicatorOptions(period, this.options.getSmothering(), null);
         return EMAIndicator.run(input, options);
     }
 }

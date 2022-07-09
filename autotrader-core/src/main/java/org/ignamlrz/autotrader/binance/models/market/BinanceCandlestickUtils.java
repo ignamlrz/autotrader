@@ -1,6 +1,6 @@
 package org.ignamlrz.autotrader.binance.models.market;
 
-import org.ignamlrz.autotrader.core.time.Timeframe;
+import org.ignamlrz.autotrader.core.utilities.time.Timeframe;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;

@@ -1,4 +1,4 @@
-package org.ignamlrz.autotrader.core.time;
+package org.ignamlrz.autotrader.core.utilities.time;
 
 import java.util.Date;
 

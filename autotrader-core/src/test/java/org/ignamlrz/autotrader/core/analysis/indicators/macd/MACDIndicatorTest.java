@@ -1,68 +1,78 @@
 package org.ignamlrz.autotrader.core.analysis.indicators.macd;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import org.hamcrest.CoreMatchers;
 import org.ignamlrz.autotrader.core.analysis.indicators.Indicator;
+import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorCategory;
+import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorTarget;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.ignamlrz.autotrader.core.analysis.indicators.IndicatorTests.*;
+import static org.ignamlrz.autotrader.core.analysis.indicators.IndicatorType.MACD;
 import static org.ignamlrz.autotrader.core.analysis.indicators.macd.MACDIndicator.INPUT_ERROR_MSG;
-import static org.ignamlrz.autotrader.core.analysis.indicators.macd.MACDIndicatorOptions.*;
+import static org.ignamlrz.autotrader.core.utilities.conversion.ConversionUtils.fromJson;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MACDIndicatorTest {
 
     @ParameterizedTest
     @MethodSource(value = "validArgs")
-    void testIsCreatedCorrectly(MACDIndicatorOptions options) {
+    void testsIsCreatedCorrectly(String json) throws JsonProcessingException {
         // ...build indicator
-        MACDIndicator indicator = new MACDIndicator(options);
+        MACDIndicator indicator = (MACDIndicator) fromJson(json, Indicator.class);
 
         // ...check generic properties of this instance
-        assertEquals(MACDIndicator.IDENTIFIER, indicator.getIdentifier());
-        assertEquals(MACDIndicator.NAME, indicator.getName());
-        assertEquals(MACDIndicator.TYPE, indicator.getType());
+        assertEquals(MACD, indicator.metadata().identifier());
+        assertEquals("Moving Average Convergence/Divergence", indicator.metadata().name());
+        assertEquals(IndicatorCategory.INDICATOR, indicator.metadata().type());
+    }
+
+    @ParameterizedTest
+    @MethodSource(value = "invalidArgs")
+    void testShouldNotBeCreated(String json) {
+        // ...build indicator
+        assertThrows(ValueInstantiationException.class, () -> fromJson(json, Indicator.class));
+    }
+
+    @Test
+    void testConversion() throws JsonProcessingException {
+        // ...build indicator
+        Indicator exampleIndicator = new MACDIndicator(minimumOptions());
+
+        // ...compare string from macd and indicator
+        String json = exampleIndicator.toString();
+
+        // ...create new indicator from Json
+        MACDIndicator indicator = (MACDIndicator) fromJson(json, Indicator.class);
+
+        // ...check generic properties of this instance
+        assertEquals("macd", indicator.metadata().identifier());
+        assertEquals("Moving Average Convergence/Divergence", indicator.metadata().name());
+        assertEquals(IndicatorCategory.INDICATOR, indicator.metadata().type());
 
         // ...check options
-        assertEquals(options.getShortPeriod(), indicator.getOptions().getShortPeriod());
-        assertEquals(options.getLongPeriod(), indicator.getOptions().getLongPeriod());
-        assertEquals(options.getSignalPeriod(), indicator.getOptions().getSignalPeriod());
-        assertEquals(options.getSmothering(), indicator.getOptions().getSmothering());
-        assertEquals(options.getTarget(), indicator.getOptions().getTarget());
+        assertEquals(minimumOptions().getShortPeriod(), indicator.getOptions().getShortPeriod());
+        assertEquals(minimumOptions().getLongPeriod(), indicator.getOptions().getLongPeriod());
+        assertEquals(minimumOptions().getSignalPeriod(), indicator.getOptions().getSignalPeriod());
+        assertEquals(minimumOptions().getSmothering(), indicator.getOptions().getSmothering());
+        assertEquals(minimumOptions().getTarget(), indicator.getOptions().getTarget());
     }
 
     @Test
     void testShouldNotBeCreatedForAnotherInput() {
         // ...given
-        MACDIndicator indicator = new MACDIndicator(MACDIndicatorOptions.builder()
-                .shortPeriod(MIN_SHORT_PERIOD)
-                .longPeriod(MIN_SHORT_PERIOD + 1)
-                .signalPeriod(MIN_SIGNAL_PERIOD)
-                .smothering(MIN_SMOTHERING)
-                .build());
+        MACDIndicator indicator = new MACDIndicator(minimumOptions());
 
         // ...build indicator
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> indicator.run(emaInputs));
 
         assertThat(ex.getMessage(), CoreMatchers.containsString(INPUT_ERROR_MSG));
-    }
-
-    @ParameterizedTest
-    @MethodSource(value = "invalidArgs")
-    void testShouldNotBeCreated(int shortPeriod, int longPeriod, int signalPeriod, int smothering, String msg) {
-        // ...build indicator
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-                createNewMACDIndicator(shortPeriod, longPeriod, signalPeriod, smothering)
-        );
-
-        assertThat(ex.getMessage(), CoreMatchers.containsString(msg));
     }
 
     @Test
@@ -74,7 +84,9 @@ class MACDIndicatorTest {
         float allowedDelta = 0.03f;
 
         // ...build indicator
-        MACDIndicator indicator = createNewMACDIndicator(shortPeriod, longPeriod, signalPeriod, DEFAULT_SMOTHERING);
+        MACDIndicatorOptions options = new MACDIndicatorOptions(shortPeriod, longPeriod, signalPeriod, null, null);
+
+        Indicator indicator = new MACDIndicator(options);
 
         // ...use known IndicatorInput and IndicatorOutput
         MACDIndicatorInput input = new MACDIndicatorInput(predefinedInput);
@@ -84,54 +96,29 @@ class MACDIndicatorTest {
 
         // ...check obtain same results as known output
         assertEquals(expectedMacd.length, output.getMacd().length);
-        assertEquals(expectedMacdSignal.length, output.getMacdSignal().length);
-        assertEquals(expectedMacdHistogram.length, output.getMacdHistogram().length);
+        assertEquals(expectedMacdSignal.length, output.getSignal().length);
+        assertEquals(expectedMacdHistogram.length, output.getHistogram().length);
         for (int i = 0; i < predefinedInput.length; i++) {
             // ...check each output data
             if (expectedMacd[i] == null) assertNull(output.getMacd()[i]);
             else assertEquals(expectedMacd[i], output.getMacd()[i], allowedDelta);
 
-            if (expectedMacdSignal[i] == null) assertNull(output.getMacdSignal()[i]);
-            else assertEquals(expectedMacdSignal[i], output.getMacdSignal()[i], allowedDelta);
+            if (expectedMacdSignal[i] == null) assertNull(output.getSignal()[i]);
+            else assertEquals(expectedMacdSignal[i], output.getSignal()[i], allowedDelta);
 
-            if (expectedMacdHistogram[i] == null) assertNull(output.getMacdHistogram()[i]);
-            else assertEquals(expectedMacdHistogram[i], output.getMacdHistogram()[i], allowedDelta);
+            if (expectedMacdHistogram[i] == null) assertNull(output.getHistogram()[i]);
+            else assertEquals(expectedMacdHistogram[i], output.getHistogram()[i], allowedDelta);
         }
     }
 
-    /**
-     * Method for create a new MACD Indicator
-     *
-     * @param shortPeriod  Short period
-     * @param longPeriod   Long period
-     * @param signalPeriod Signal period
-     * @param smothering   Smothering
-     * @return a new MACD indicator
-     */
-    private MACDIndicator createNewMACDIndicator(int shortPeriod, int longPeriod, int signalPeriod, int smothering) {
-        // ...build MACD options
-        MACDIndicatorOptions options = new MACDIndicatorOptions(shortPeriod, longPeriod, signalPeriod, smothering, null);
-
-        // ...create the indicator
-        return new MACDIndicator(options);
-    }
-
-    /**
-     * Method for create a new MACD Indicator
-     *
-     * @return a new MACD indicator
-     */
-    private MACDIndicator createBasicMACDIndicator() {
-        // ...build MACD options
-        MACDIndicatorOptions options = new MACDIndicatorOptions(
-                MIN_SHORT_PERIOD,
-                MIN_SHORT_PERIOD + 1,
-                MIN_SIGNAL_PERIOD, MIN_SMOTHERING,
-                null
+    private static MACDIndicatorOptions minimumOptions() {
+        return new MACDIndicatorOptions(
+                9,
+                16 + 1,
+                20,
+                3,
+                IndicatorTarget.HIGH
         );
-
-        // ...create the indicator
-        return new MACDIndicator(options);
     }
 
     /**
@@ -139,19 +126,15 @@ class MACDIndicatorTest {
      *
      * @return stream of arguments
      */
-    private static Stream<Arguments> validArgs() {
-        List<Arguments> arguments = new ArrayList<>();
-        for (Indicator.Target target : Indicator.Target.values()) {
-            MACDIndicatorOptions options = new MACDIndicatorOptions(
-                    MIN_SHORT_PERIOD,
-                    MIN_SHORT_PERIOD + 1,
-                    MIN_SIGNAL_PERIOD,
-                    MIN_SMOTHERING,
-                    target
-            );
-            arguments.add(Arguments.of(options));
-        }
-        return arguments.stream();
+    private static Stream<String> validArgs() {
+        String[] JSONs = {
+                "{\"type\":\"macd\",\"options\":{\"shortPeriod\":1,\"longPeriod\":2,\"signalPeriod\":1,\"smothering\":1,\"target\":\"CLOSE\"}}",
+                "{\"type\":\"macd\",\"options\":{\"shortPeriod\":40,\"longPeriod\":78,\"signalPeriod\":43,\"smothering\":2,\"target\":\"HIGH\"}}",
+                "{\"type\":\"macd\",\"options\":{\"shortPeriod\":7,\"longPeriod\":23,\"signalPeriod\":89,\"smothering\":5,\"target\":\"OPEN\"}}",
+                "{\"type\":\"macd\",\"options\":{\"shortPeriod\":2,\"longPeriod\":47,\"signalPeriod\":4,\"target\":\"LOW\"}}",
+                "{\"type\":\"macd\",\"options\":{\"shortPeriod\":3,\"longPeriod\":4,\"signalPeriod\":5,\"smothering\":8}}"
+        };
+        return Stream.of(JSONs);
     }
 
     /**
@@ -159,37 +142,13 @@ class MACDIndicatorTest {
      *
      * @return stream of arguments
      */
-    private static Stream<Arguments> invalidArgs() {
-        return Stream.of(
-                Arguments.of(   //  Minimum short period error
-                        MIN_SHORT_PERIOD - 1,
-                        MIN_SHORT_PERIOD + 1,
-                        MIN_SIGNAL_PERIOD,
-                        MIN_SMOTHERING,
-                        MIN_SHORT_PERIOD_MSG
-                ),
-                Arguments.of(   // Long period must be greater than short period
-                        MIN_SHORT_PERIOD,
-                        MIN_SHORT_PERIOD,
-                        MIN_SIGNAL_PERIOD,
-                        MIN_SMOTHERING,
-                        MIN_LONG_PERIOD_MSG
-                ),
-                Arguments.of(   //  Minimum signal period error
-                        MIN_SHORT_PERIOD,
-                        MIN_SHORT_PERIOD + 1,
-                        MIN_SIGNAL_PERIOD - 1,
-                        MIN_SMOTHERING,
-                        MIN_SIGNAL_PERIOD_MSG
-                ),
-                Arguments.of(   //  Minimum smothering error
-                        MIN_SHORT_PERIOD,
-                        MIN_SHORT_PERIOD + 1,
-                        MIN_SIGNAL_PERIOD,
-                        MIN_SMOTHERING - 1,
-                        MIN_SMOTHERING_MSG
-                )
-        );
+    private static Stream<String> invalidArgs() {
+        String[] JSONs = {
+                "{\"type\":\"macd\",\"options\":{\"shortPeriod\":0,\"longPeriod\":2,\"signalPeriod\":1}}",
+                "{\"type\":\"macd\",\"options\":{\"shortPeriod\":10,\"longPeriod\":10,\"signalPeriod\":43}}",
+                "{\"type\":\"macd\",\"options\":{\"shortPeriod\":7,\"longPeriod\":23,\"signalPeriod\":0}}",
+                "{\"type\":\"macd\",\"options\":{\"shortPeriod\":2,\"longPeriod\":47,\"signalPeriod\":2,\"smothering\":0}}"
+        };
+        return Stream.of(JSONs);
     }
-
 }

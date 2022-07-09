@@ -1,4 +1,4 @@
-package org.ignamlrz.autotrader.core.time;
+package org.ignamlrz.autotrader.core.utilities.time;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

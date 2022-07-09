@@ -1,20 +1,18 @@
-package org.ignamlrz.autotrader.core.time;
+package org.ignamlrz.autotrader.core.utilities.time;
 
 import java.util.stream.Stream;
-
-import static org.ignamlrz.autotrader.core.time.TimeConstants.*;
 
 /**
  * Enum of Intervals
  */
 public enum Interval {
-    MINUTE_1(MINUTE_TO_SECONDS),
-    MINUTE_5(MINUTE_TO_SECONDS * 5L),
-    MINUTE_15(MINUTE_TO_SECONDS * 15L),
-    HOUR_1(HOUR_TO_SECONDS),
-    HOUR_4(HOUR_TO_SECONDS * 4L),
-    DAY_1(DAY_TO_SECONDS),
-    WEEK_1(WEEK_TO_SECONDS);
+    MINUTE_1(TimeConstants.MINUTE_TO_SECONDS),
+    MINUTE_5(TimeConstants.MINUTE_TO_SECONDS * 5L),
+    MINUTE_15(TimeConstants.MINUTE_TO_SECONDS * 15L),
+    HOUR_1(TimeConstants.HOUR_TO_SECONDS),
+    HOUR_4(TimeConstants.HOUR_TO_SECONDS * 4L),
+    DAY_1(TimeConstants.DAY_TO_SECONDS),
+    WEEK_1(TimeConstants.WEEK_TO_SECONDS);
 
     // Fields
     private final long seconds;

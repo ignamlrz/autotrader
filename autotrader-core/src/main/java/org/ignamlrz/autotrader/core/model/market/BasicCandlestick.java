@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
-import org.ignamlrz.autotrader.core.time.Timeframe;
+import org.ignamlrz.autotrader.core.utilities.time.Timeframe;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;

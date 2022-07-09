@@ -1,13 +1,21 @@
 package org.ignamlrz.autotrader.core.analysis.indicators.ema;
 
-import lombok.EqualsAndHashCode;
-import lombok.Value;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.ignamlrz.autotrader.core.analysis.AnalysisResult;
 import org.ignamlrz.autotrader.core.analysis.indicators.Indicator;
+import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorCategory;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorInput;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorOutput;
+import org.ignamlrz.autotrader.core.annotations.IndicatorInfo;
 import org.ignamlrz.autotrader.core.model.market.BasicChart;
 import org.ignamlrz.autotrader.core.utilities.FloatUtils;
+import org.ignamlrz.autotrader.core.utilities.conversion.ConversionUtils;
+
+import javax.validation.constraints.NotNull;
+import java.util.Optional;
+
+import static org.ignamlrz.autotrader.core.analysis.indicators.IndicatorType.EMA;
 
 /**
  * Exponential Moving Average indicator
@@ -15,17 +23,16 @@ import org.ignamlrz.autotrader.core.utilities.FloatUtils;
  * @see <a href="https://www.investopedia.com/terms/e/ema.asp">investopedia.com</a>
  * @see <a href="https://tulipindicators.org/ema">tulipindicators.org</a>
  */
-@Value
-@EqualsAndHashCode(callSuper = true)
+@IndicatorInfo(identifier = EMA, name = "Exponential Moving Average", type = IndicatorCategory.OVERLAY)
 public class EMAIndicator extends Indicator {
 
     // ========================================================
     // = STATIC FIELDS
     // ========================================================
 
-    static final String IDENTIFIER = "ema";
-    static final String NAME = "Exponential Moving Average";
-    static final Type TYPE = Type.OVERLAY;
+    // Error messages
+    static final String INPUT_ERROR_MSG = "input must be an EMA Indicator Input";
+    static final String OUTPUT_ERROR_MSG = "output must be an EMA Indicator Output";
 
     // ========================================================
     // = INSTANCE FIELDS
@@ -34,20 +41,29 @@ public class EMAIndicator extends Indicator {
     /**
      * EMA Indicator options
      */
-    EMAIndicatorOptions options;
+    private final EMAIndicatorOptions options;
 
     // ========================================================
     // = CONSTRUCTORS
     // ========================================================
 
     /**
-     * Constructor of the {@link EMAIndicator}
+     * Constructor of {@link EMAIndicator}
      *
      * @param options to use
      */
-    public EMAIndicator(EMAIndicatorOptions options) {
-        super(IDENTIFIER, NAME, TYPE);
-        this.options = options;
+    @JsonCreator
+    public EMAIndicator(@JsonProperty("options") @NotNull EMAIndicatorOptions options) {
+        this.options = Optional.of(options).get();
+    }
+
+    // ========================================================
+    // = GETTERS
+    // ========================================================
+
+    @Override
+    public EMAIndicatorOptions getOptions() {
+        return options;
     }
 
     // ========================================================
@@ -91,6 +107,11 @@ public class EMAIndicator extends Indicator {
         Float[] reals = FloatUtils.arrayOf(chart.getDataFrom(this.options.getTarget()));
         EMAIndicatorInput input = new EMAIndicatorInput(reals);
         return run(input);
+    }
+
+    @Override
+    public String toString() {
+        return ConversionUtils.toJson(this);
     }
 
     // ========================================================

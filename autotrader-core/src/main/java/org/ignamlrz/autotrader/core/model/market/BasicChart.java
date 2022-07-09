@@ -1,8 +1,8 @@
 package org.ignamlrz.autotrader.core.model.market;
 
-import org.ignamlrz.autotrader.core.analysis.indicators.Indicator;
+import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorTarget;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorUtils;
-import org.ignamlrz.autotrader.core.time.Interval;
+import org.ignamlrz.autotrader.core.utilities.time.Interval;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
@@ -12,7 +12,7 @@ public class BasicChart {
     List<BasicCandlestick> basicCandlesticks;
     Interval interval;
 
-    public List<Float> getDataFrom(@Nullable Indicator.Target target) {
+    public List<Float> getDataFrom(@Nullable IndicatorTarget target) {
         switch (IndicatorUtils.ofNullable(target)) {
             case OPEN: return basicCandlesticks.stream().map(BasicCandlestick::getOpen).collect(Collectors.toList());
             case HIGH: return basicCandlesticks.stream().map(BasicCandlestick::getHigh).collect(Collectors.toList());
