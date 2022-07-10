@@ -1,6 +1,6 @@
 package org.ignamlrz.autotrader.core.analysis.indicators;
 
-import org.ignamlrz.autotrader.core.model.market.BasicChart;
+import org.ignamlrz.autotrader.core.model.market.Chart;
 
 /**
  * Interface that allow to be processable any indicator
@@ -21,5 +21,5 @@ public interface IndicatorProcessable {
      * @param chart Chart to process
      * @return Indicator output data
      */
-    <T extends BasicChart> IndicatorOutput run(T chart);
+    <T extends Chart> IndicatorOutput run(T chart);
 }

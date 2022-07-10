@@ -26,16 +26,6 @@ import java.util.stream.Collectors;
 public abstract class Indicator implements Analyzable, IndicatorProcessable {
 
     // ========================================================
-    // = GENERIC ENUMS
-    // ========================================================
-
-    /**
-     * Enum indicating type of indicators
-     */
-    public enum Category {
-    }
-
-    // ========================================================
     // = GETTERS
     // ========================================================
 

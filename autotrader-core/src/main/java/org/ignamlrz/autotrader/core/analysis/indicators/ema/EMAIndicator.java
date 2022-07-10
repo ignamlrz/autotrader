@@ -8,10 +8,11 @@ import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorCategory;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorInput;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorOutput;
 import org.ignamlrz.autotrader.core.annotations.IndicatorInfo;
-import org.ignamlrz.autotrader.core.model.market.BasicChart;
+import org.ignamlrz.autotrader.core.model.market.Chart;
 import org.ignamlrz.autotrader.core.utilities.FloatUtils;
 import org.ignamlrz.autotrader.core.utilities.conversion.ConversionUtils;
 
+import javax.naming.NameNotFoundException;
 import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
@@ -103,8 +104,13 @@ public class EMAIndicator extends Indicator {
     }
 
     @Override
-    public <T extends BasicChart> IndicatorOutput run(T chart) {
-        Float[] reals = FloatUtils.arrayOf(chart.getDataFrom(this.options.getTarget()));
+    public <T extends Chart> IndicatorOutput run(T chart) {
+        Float[] reals;
+        try {
+            reals = FloatUtils.arrayOf(chart.dataByTarget(this.options.getTarget()));
+        } catch (NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         EMAIndicatorInput input = new EMAIndicatorInput(reals);
         return run(input);
     }

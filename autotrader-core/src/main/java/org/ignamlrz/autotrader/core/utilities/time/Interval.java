@@ -6,6 +6,11 @@ import java.util.stream.Stream;
  * Enum of Intervals
  */
 public enum Interval {
+
+    // ========================================================
+    // = PREDEFINED ENUMS
+    // ========================================================
+
     MINUTE_1(TimeConstants.MINUTE_TO_SECONDS),
     MINUTE_5(TimeConstants.MINUTE_TO_SECONDS * 5L),
     MINUTE_15(TimeConstants.MINUTE_TO_SECONDS * 15L),
@@ -14,12 +19,23 @@ public enum Interval {
     DAY_1(TimeConstants.DAY_TO_SECONDS),
     WEEK_1(TimeConstants.WEEK_TO_SECONDS);
 
-    // Fields
+    // ========================================================
+    // = INSTANCE FIELDS
+    // ========================================================
+
     private final long seconds;
+
+    // ========================================================
+    // = CONSTRUCTORS
+    // ========================================================
 
     Interval(long seconds) {
         this.seconds = seconds;
     }
+
+    // ========================================================
+    // = STATIC METHODS
+    // ========================================================
 
     /**
      * Method for find a predefined interval given his milliseconds
@@ -33,6 +49,30 @@ public enum Interval {
                 // test milliseconds
                 .filter(interval -> interval.testMillis(milliseconds))
                 .findFirst().orElseThrow(() -> new RuntimeException("Interval of " + milliseconds + " ms not found"));
+    }
+
+    // ========================================================
+    // = METHODS
+    // ========================================================
+
+    /**
+     * Method for get next timestamp
+     *
+     * @param timestamp Current timestamp
+     * @return next timestamp
+     */
+    public long next(long timestamp) {
+        return this.toMillis() + timestamp;
+    }
+
+    /**
+     * Method for get previous timestamp
+     *
+     * @param timestamp Current timestamp
+     * @return previous timestamp
+     */
+    public long previous(long timestamp) {
+        return timestamp - this.toMillis();
     }
 
     /**
