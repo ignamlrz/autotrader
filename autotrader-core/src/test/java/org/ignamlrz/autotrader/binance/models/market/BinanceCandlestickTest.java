@@ -19,7 +19,7 @@ class BinanceCandlestickTest {
 
     @ParameterizedTest
     @MethodSource("testJSONs")
-    void testConversion(String json, String errorMsg) throws JsonProcessingException {
+    void testConversion(String errorMsg, String json) throws JsonProcessingException {
         BinanceCandlestick candlestick = TestUtils.buildJSON(json, BinanceCandlestick.class, errorMsg);
 
         if(Optional.ofNullable(candlestick).isPresent()) {
@@ -32,13 +32,13 @@ class BinanceCandlestickTest {
     // ========================================================
 
     /**
-     * Static method of JSONs to check
+     * Static method for generate JSONs of this class
      *
-     * @return stream of JSONs
+     * @return stream of arguments (errorMessage: string, JSON: string)
      */
     private static Stream<Arguments> testJSONs() {
         Arguments[] args = {
-                Arguments.of("{\n" +
+                Arguments.of(null, "{\n" +
                         "  \"open\": 0.1,\n" +
                         "  \"high\": 0.2,\n" +
                         "  \"low\": 0.05,\n" +
@@ -49,9 +49,9 @@ class BinanceCandlestickTest {
                         "  \"quoteVolume\": 0.47,\n" +
                         "  \"takerBuyVolume\": 0.47,\n" +
                         "  \"takerBuyQuoteVolume\": 0.47\n" +
-                        "}", null
+                        "}"
                 ),
-                Arguments.of("{\n" +
+                Arguments.of("num trades is lower than 0", "{\n" +
                         "  \"open\": 0.1,\n" +
                         "  \"high\": 0.2,\n" +
                         "  \"low\": 0.05,\n" +
@@ -62,9 +62,9 @@ class BinanceCandlestickTest {
                         "  \"quoteVolume\": 0.47,\n" +
                         "  \"takerBuyVolume\": 0.47,\n" +
                         "  \"takerBuyQuoteVolume\": 0.47\n" +
-                        "}", "num trades is lower than 0"
+                        "}"
                 ),
-                Arguments.of("{\n" +
+                Arguments.of("quote asset volume is lower than 0", "{\n" +
                         "  \"open\": 0.1,\n" +
                         "  \"high\": 0.2,\n" +
                         "  \"low\": 0.05,\n" +
@@ -75,9 +75,9 @@ class BinanceCandlestickTest {
                         "  \"quoteVolume\": -0.47,\n" +
                         "  \"takerBuyVolume\": 0.47,\n" +
                         "  \"takerBuyQuoteVolume\": 0.47\n" +
-                        "}", "quote asset volume is lower than 0"
+                        "}"
                 ),
-                Arguments.of("{\n" +
+                Arguments.of("taker buy base asset volume is lower than 0", "{\n" +
                         "  \"open\": 0.1,\n" +
                         "  \"high\": 0.2,\n" +
                         "  \"low\": 0.05,\n" +
@@ -88,9 +88,9 @@ class BinanceCandlestickTest {
                         "  \"quoteVolume\": 0.47,\n" +
                         "  \"takerBuyVolume\": -0.47,\n" +
                         "  \"takerBuyQuoteVolume\": 0.47\n" +
-                        "}", "taker buy base asset volume is lower than 0"
+                        "}"
                 ),
-                Arguments.of("{\n" +
+                Arguments.of("taker buy quote asset volume is lower than 0", "{\n" +
                         "  \"open\": 0.1,\n" +
                         "  \"high\": 0.2,\n" +
                         "  \"low\": 0.05,\n" +
@@ -101,7 +101,7 @@ class BinanceCandlestickTest {
                         "  \"quoteVolume\": 0.47,\n" +
                         "  \"takerBuyVolume\": 0.47,\n" +
                         "  \"takerBuyQuoteVolume\": -0.47\n" +
-                        "}", "taker buy quote asset volume is lower than 0"
+                        "}"
                 ),
         };
         return Stream.of(args);

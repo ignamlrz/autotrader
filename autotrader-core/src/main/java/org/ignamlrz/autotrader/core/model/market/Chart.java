@@ -11,9 +11,10 @@ import org.ignamlrz.autotrader.core.utilities.time.Timeframe;
 
 import javax.naming.NameNotFoundException;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.SortedMap;
 import java.util.stream.Collectors;
 
 /**
@@ -75,20 +76,36 @@ public abstract class Chart {
     public abstract List<Float> dataByTarget(@NotNull IndicatorTarget target) throws NameNotFoundException;
 
     /**
+     * Delete a {@link Candlestick}
+     *
+     * @param timestamp Key timestamp to delete
+     * @return true if any Candlestick was deleted, false otherwise
+     */
+    public abstract boolean delete(long timestamp);
+
+    /**
+     * Insert a {@link Candlestick}
+     *
+     * @param candlestick {@link Candlestick} to insert
+     * @return true if insert a new candlestick, false if modify a previous one
+     */
+    public abstract boolean put(Candlestick candlestick);
+
+    /**
      * Return candlestick series to a map with opening time as key
      *
      * @return a map of candlesticks
      */
-    public abstract Map<Long, ? extends Candlestick> toMap();
+    public abstract SortedMap<Long, ? extends Candlestick> toMap();
 
     // ========================================================
     // = METHODS
     // ========================================================
 
     /**
-     * Getter of closing timestamp list
+     * Retrieve closing timestamp list
      *
-     * @return a closing timestamp list
+     * @return closing timestamp list
      */
     public final List<Long> closeTimestamp() {
         return timeframes().stream().map(Timeframe::getClose).collect(Collectors.toList());
@@ -101,16 +118,7 @@ public abstract class Chart {
      * @return next {@link Candlestick}
      */
     public final Candlestick next(long timestamp) {
-        return toMap().get(this.interval.next(timestamp));
-    }
-
-    /**
-     * Getter of opening timestamp list
-     *
-     * @return an opening timestamp list
-     */
-    public final List<Long> openTimestamps() {
-        return timeframes().stream().map(Timeframe::getOpen).collect(Collectors.toList());
+        return toMap().get(timestamp).next();
     }
 
     /**
@@ -130,6 +138,15 @@ public abstract class Chart {
      */
     public final List<Timeframe> timeframes() {
         return getCandlesticks().stream().map(Candlestick::getTimeframe).collect(Collectors.toList());
+    }
+
+    /**
+     * Getter of opening timestamp list
+     *
+     * @return an opening timestamp list
+     */
+    public final List<Long> timestamps() {
+        return new ArrayList<>(toMap().keySet());
     }
 
     // ========================================================

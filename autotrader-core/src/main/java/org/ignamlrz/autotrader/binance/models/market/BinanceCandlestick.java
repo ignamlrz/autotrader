@@ -111,6 +111,30 @@ public class BinanceCandlestick extends Candlestick {
     }
 
     // ========================================================
+    // = METHODS
+    // ========================================================
+
+    /**
+     * Method for convert all values as a Binance array representation of a Candlestick/Kline
+     *
+     * @return a Binance representation array
+     */
+    public Object[] toArray() {
+        return new Object[]{
+                this.getTimeframe().getOpen(),
+                this.getOpen(),
+                this.getHigh(),
+                this.getLow(),
+                this.getClose(),
+                this.getVolume(),
+                this.getTimeframe().getClose(),
+                this.quoteVolume,
+                this.trades,
+                this.takerBuyVolume,
+                this.takerBuyQuoteVolume
+        };
+    }
+    // ========================================================
     // = PRIVATE METHODS
     // ========================================================
 

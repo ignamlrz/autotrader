@@ -3,17 +3,14 @@ package org.ignamlrz.autotrader.binance.models.market;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorTarget;
-import org.ignamlrz.autotrader.core.analysis.indicators.IndicatorUtils;
 import org.ignamlrz.autotrader.core.model.market.Candlestick;
 import org.ignamlrz.autotrader.core.model.market.Chart;
 import org.ignamlrz.autotrader.core.utilities.time.Interval;
+import org.springframework.lang.Nullable;
 
-import javax.naming.NameNotFoundException;
 import javax.validation.constraints.NotNull;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -24,7 +21,7 @@ public class BinanceChart extends Chart {
     // = INSTANCE FIELDS
     // ========================================================
 
-    private final Map<Long, BinanceCandlestick> candlesticks;
+    private final SortedMap<Long, BinanceCandlestick> candlesticks;
 
     // ========================================================
     // = CONSTRUCTORS
@@ -37,11 +34,12 @@ public class BinanceChart extends Chart {
     ) {
         super(interval);
         // ...save as a map
-        this.candlesticks = candlesticks.stream()
-                .collect(Collectors.toMap(entry -> entry.getTimeframe().getOpen(), entry -> entry));
+        this.candlesticks = new TreeMap<>();
+        for (BinanceCandlestick kline : candlesticks)
+            this.candlesticks.putIfAbsent(kline.getTimeframe().getOpen(), kline);
+
         // ...set next value on each kline
         long[] timestamp = this.candlesticks.keySet().stream()
-                .sorted()
                 .flatMapToLong(LongStream::of)
                 .toArray();
         for (int i = 1; i < timestamp.length; i++) {
@@ -53,7 +51,7 @@ public class BinanceChart extends Chart {
     }
 
     // ========================================================
-    // = OVERRIDE METHODS
+    // = GETTERS
     // ========================================================
 
     @Override
@@ -61,9 +59,27 @@ public class BinanceChart extends Chart {
         return new ArrayList<>(this.candlesticks.values());
     }
 
+    // ========================================================
+    // = METHODS
+    // ========================================================
+
+    /**
+     * Array of data
+     *
+     * @return candlesticks as array of data
+     */
+    public Object[] toArray() {
+        return this.candlesticks.values().stream().map(BinanceCandlestick::toArray).toArray();
+    }
+
+    // ========================================================
+    // = OVERRIDE METHODS
+    // ========================================================
+
     @Override
-    public List<Float> dataByTarget(IndicatorTarget target) throws NameNotFoundException {
-        switch (IndicatorUtils.ofNullable(target)) {
+    public List<Float> dataByTarget(@NotNull IndicatorTarget target) {
+        switch (target) {
+            default:
             case CLOSE:
                 return candlesticks.values().stream().map(Candlestick::getClose).collect(Collectors.toList());
             case OPEN:
@@ -74,13 +90,67 @@ public class BinanceChart extends Chart {
                 return candlesticks.values().stream().map(Candlestick::getLow).collect(Collectors.toList());
             case VOLUME:
                 return candlesticks.values().stream().map(Candlestick::getVolume).collect(Collectors.toList());
-            default:
-                throw new NameNotFoundException(target + " not found");
         }
     }
 
     @Override
-    public Map<Long, ? extends Candlestick> toMap() {
+    public boolean delete(long timestamp) {
+        // ...remove candlestick
+        Candlestick deleted = this.candlesticks.remove(timestamp);
+        if (deleted == null) return false;
+
+        // ...set next candlestick on before candlestick
+        Candlestick next = deleted.next();
+        Candlestick before = candlestickBefore(timestamp);
+        if (before != null) before.setNext(next);
+        return true;
+    }
+
+    @Override
+    public boolean put(Candlestick candlestick) {
+        // ...first validate candlestick
+        validateCandlestick(candlestick);
+
+        // ...obtain timestamp
+        long timestamp = candlestick.getTimeframe().getOpen();
+
+        // ...check if already exists
+        if (this.candlesticks.containsKey(timestamp)) {
+            // ...put data and return false (no new creation)
+            this.candlesticks.put(timestamp, (BinanceCandlestick) candlestick);
+            return false;
+        }
+
+        if (timestamp < this.candlesticks.lastKey()) {
+            // Inserted between candlestick series
+            // ...find before and after timestamps
+            Candlestick before = candlestickBefore(timestamp);
+            Candlestick next = (before != null)
+                    ? before.next()
+                    : this.candlesticks.get(this.candlesticks.firstKey());
+
+            // ...put candlestick
+            this.candlesticks.put(timestamp, (BinanceCandlestick) candlestick);
+
+            // ...set next
+            if (before != null) before.setNext(candlestick);
+            candlestick.setNext(next);
+
+        } else {
+            // Inserted as last element
+            // ...put candlestick
+            this.candlesticks.put(timestamp, (BinanceCandlestick) candlestick);
+
+            // ...modify next of last candlestick to point on candlesticks
+            Candlestick last = this.candlesticks.get(this.candlesticks.lastKey());
+            last.setNext(candlestick);
+
+        }
+        return true;
+    }
+
+    @Override
+    public SortedMap<Long, ? extends Candlestick> toMap() {
         return this.candlesticks;
     }
 
@@ -88,27 +158,51 @@ public class BinanceChart extends Chart {
     // = PRIVATE METHODS
     // ========================================================
 
+    /**
+     * Do validation of field properties
+     */
     private void doValidation() {
         long count = this.candlesticks.values().stream()
-                .filter(kline -> kline.next() != null)
+                .filter(kline -> kline.next() == null)
                 .count();
-        if (count == 1) throw new InvalidParameterException("Must be one candlestick with next property as null");
-
+        if (count != 1) throw new InvalidParameterException("Must be one candlestick with next property as null");
 
         this.candlesticks.values().forEach(this::validateCandlestick);
     }
 
     /**
-     * Method for check a candlestick is serializable (close price coincide with open price)
+     * Method for validate a candlestick with chart properties
      *
      * @param candlestick Candlestick to check
      */
     private void validateCandlestick(Candlestick candlestick) {
         // ...check candlestick with chart interval
-        if (!this.interval.equals(candlestick.getTimeframe().interval()))
+        if (!this.interval.testMillis(candlestick.getTimeframe().diff() + 1))
             throw new InvalidParameterException("candlestick interval not match with chart interval");
         // ...opening timestamp must be module 0
-        if ((candlestick.getTimeframe().getOpen() % this.interval.toMillis()) == 0)
-            throw new InvalidParameterException("candlesticks opening timestamp not match with openings of chart interval");
+        if ((candlestick.getTimeframe().getOpen() % this.interval.toMillis()) != 0)
+            throw new InvalidParameterException("candlesticks timestamp not match with openings of chart interval");
+    }
+
+    /**
+     * Method for find the candlestick before a timestamp
+     *
+     * @param timestamp Timestamp to search
+     * @return candlestick before a timestamp
+     */
+    private @Nullable Candlestick candlestickBefore(long timestamp) {
+        // ...get all timestamps
+        long[] keyTimestamps = this.candlesticks.keySet().stream()
+                .flatMapToLong(LongStream::of)
+                .toArray();
+
+        // ...find candlestick before this date
+        Candlestick candlestick = null;
+        for (long keyTimestamp : keyTimestamps) {
+            if ((timestamp - keyTimestamp) < 0) return candlestick;
+            candlestick = this.candlesticks.get(keyTimestamp);
+        }
+
+        return candlestick;
     }
 }
