@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Spring Boot Parent -->
+    <parent>
+        <groupId>io.github.ignamlrz</groupId>
+        <artifactId>autotrader</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <!-- Project Info -->
+    <artifactId>autotrader-service</artifactId>
+    <name>ignamlrz-autotrader-service</name>
+    <version>0.0.1-SNAPSHOT</version>
+    <description>Service of Auto-Trader project</description>
+
+    <!-- Project Properties -->
+    <properties>
+        <java.version>11</java.version>
+    </properties>
+
+    <!-- Dependencies -->
+    <dependencies>
+        <!-- Auto-Trades core -->
+        <dependency>
+            <groupId>io.github.ignamlrz</groupId>
+            <artifactId>autotrader-core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Mongodb -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
+        <!-- Web Service -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Binance API Client -->
+        <dependency>
+            <groupId>io.github.binance</groupId>
+            <artifactId>binance-connector-java</artifactId>
+            <version>1.6.3</version>
+        </dependency>
+    </dependencies>
+
+    <!-- Build -->
+    <build>
+        <plugins>
+            <!-- Spring Boot Framework Plugin -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

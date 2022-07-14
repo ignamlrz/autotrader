@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <conversionRule conversionWord="epoch"
+                    converterClass="com.binance.connector.logging.util.MsEpochConverter" />
+
+    <property name="LOG_PATTERN" value="%epoch [%date{HH:mm:ss.SSS}] [%-10.-10thread{10}] | %-5level{5} | %-36.-36logger{36} => %msg%n" />
+
+
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="asyncAppender" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="stdout" />
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="asyncAppender" />
+    </root>
+</configuration>

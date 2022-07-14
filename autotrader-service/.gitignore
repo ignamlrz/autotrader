@@ -3,9 +3,9 @@
 
 # Except this files
 !.gitignore
-!docker-compose.yml
+!Dockerfile
+!HELP.md
 !pom.xml
 
 # Except this folders
-!autotrader-core/
-!autotrader-service/
+!src/
