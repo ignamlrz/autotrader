@@ -21,6 +21,12 @@
 
     <!-- Dependencies -->
     <dependencies>
+        <!-- Mongodb -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
         <!-- JDK 8 Module (allow use Optional) -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>

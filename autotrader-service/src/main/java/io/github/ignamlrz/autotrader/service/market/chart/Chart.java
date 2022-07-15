@@ -117,43 +117,43 @@ public class Chart {
     public Map<Long, ChartData> getData() {
         return data;
     }
-
-    /**
-     * Getter of all indicators
-     *
-     * @return indicators
-     */
-    public List<IndicatorOutput> getIndicators() {
-        return indicators;
-    }
+//
+//    /**
+//     * Getter of all indicators
+//     *
+//     * @return indicators
+//     */
+//    public List<IndicatorOutput> getIndicators() {
+//        return indicators;
+//    }
 
     // ========================================================
     // = METHODS
     // ========================================================
-
-    /**
-     * Method for add an indicator
-     *
-     * @param indicator Appends the specified element to the map and is calculated
-     * @return output calculated
-     */
-    public boolean add(Indicator indicator, int minCandlesticks) {
-        IndicatorOutput output = this.indicators.get(indicator);
-        if (!output) this.indicators.add(indicator);
-        return !exists;
-    }
-
-    /**
-     * Method for add an indicator
-     *
-     * @param indicator Appends the specified element to the end of this list (optional operation)
-     * @return true if not exists and is added, false otherwise
-     */
-    public IndicatorOutput remove(Class<IndicatorOutput> indicator) {
-        boolean exists = this.indicators.removeIf(item -> item.getClass().equals(indicator));
-        if (!exists) this.indicators.add(indicator);
-        return !exists;
-    }
+//
+//    /**
+//     * Method for add an indicator
+//     *
+//     * @param indicator Appends the specified element to the map and is calculated
+//     * @return output calculated
+//     */
+//    public boolean add(Indicator indicator, int minCandlesticks) {
+//        IndicatorOutput output = this.indicators.get(indicator);
+//        if (!output) this.indicators.add(indicator);
+//        return !exists;
+//    }
+//
+//    /**
+//     * Method for add an indicator
+//     *
+//     * @param indicator Appends the specified element to the end of this list (optional operation)
+//     * @return true if not exists and is added, false otherwise
+//     */
+//    public IndicatorOutput remove(Class<IndicatorOutput> indicator) {
+//        boolean exists = this.indicators.removeIf(item -> item.getClass().equals(indicator));
+//        if (!exists) this.indicators.add(indicator);
+//        return !exists;
+//    }
 
     // ========================================================
     // = OVERRIDE METHODS
