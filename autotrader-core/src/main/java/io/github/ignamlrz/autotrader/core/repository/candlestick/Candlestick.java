@@ -1,49 +1,51 @@
 package io.github.ignamlrz.autotrader.core.repository.candlestick;
 
-import io.github.ignamlrz.autotrader.core.collection.SortedEnumMap;
+import io.github.ignamlrz.autotrader.core.collection.LinkedUnrepeatableEnumMap;
 import io.github.ignamlrz.autotrader.core.repository.general.Series;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-public abstract class Candlestick extends Series {
+public class Candlestick extends Series {
 
     // ========================================================
     // = ENUMS
     // ========================================================
 
     public enum TypeData {
-        OPEN, HIGH, LOW, CLOSE, VOLUME, TRADES, TAKER_BUY_VOLUME, TAKER_BUY_SELL
+        OPEN, HIGH, LOW, CLOSE, VOLUME, TRADES, TAKER_BUY_VOLUME
     }
 
     // ========================================================
     // = STATIC FIELDS
     // ========================================================
 
-    // TODO Esto es una mezcla entre el TimeSeries y el Candlestick. Realmente sería:
+    //TODO Esto es una mezcla entre el TimeSeries y el Candlestick. Realmente sería:
+    //  - Candlestick extiende de Series (Contiene la logica para extraer cualquier tipo de datos)
     //  - TimeSeries es una clase que contiene un map<Long, ? extent Series> donde Long corresponde a un timestamp
-    //    y su valor se corresponde a una serie
-    //  - CandlestickSeries corresponde con la herencia de TimeSeries, pero en este caso contendría un
-    //  mapa<Long, Candlestick>.
-    static SortedEnumMap<TypeData> BINANCE_DATA_SORTING = new SortedEnumMap<>(new TypeData[]{
+    //    y su valor se corresponde a una serie (contiene toda la logica para añadir en principio/medio/final una nueva serie)
+    //  - CandlestickSeries contiene un TimeSeries de Candlestic
+    static LinkedUnrepeatableEnumMap<TypeData> BINANCE_DATA_SORTING = new LinkedUnrepeatableEnumMap<>(new TypeData[]{
             TypeData.OPEN,
             TypeData.HIGH,
             TypeData.LOW,
             TypeData.CLOSE
     });
 
-
     // ========================================================
     // = INSTANCE FIELDS
     // ========================================================
 
-    private final Map<Long, Float[]> data;
+    private final Number[] data;
+    private final LinkedUnrepeatableEnumMap<TypeData> dataType;
 
     // ========================================================
     // = CONSTRUCTORS
     // ========================================================
 
-    public Candlestick(float[] data) {
+    public Candlestick(Number[] data, LinkedUnrepeatableEnumMap<TypeData> dataType) {
         this.data = data;
+        this.dataType = dataType;
     }
 
     // ========================================================
@@ -56,8 +58,7 @@ public abstract class Candlestick extends Series {
      * @return open price
      */
     public Float getOpen() {
-        if(!existsDataType(TypeData.OPEN)) return null;
-        return data[getDataTypeSorting().];
+        return (Float) dataOf(TypeData.OPEN);
     }
 
     /**
@@ -65,8 +66,8 @@ public abstract class Candlestick extends Series {
      *
      * @return high price
      */
-    public float getHigh() {
-        return high;
+    public Float getHigh() {
+        return (Float) dataOf(TypeData.HIGH);
     }
 
     /**
@@ -74,8 +75,8 @@ public abstract class Candlestick extends Series {
      *
      * @return low price
      */
-    public float getLow() {
-        return low;
+    public Float getLow() {
+        return (Float) dataOf(TypeData.LOW);
     }
 
     /**
@@ -83,8 +84,8 @@ public abstract class Candlestick extends Series {
      *
      * @return close price
      */
-    public float getClose() {
-        return close;
+    public Float getClose() {
+        return (Float) dataOf(TypeData.CLOSE);
     }
 
     /**
@@ -92,28 +93,8 @@ public abstract class Candlestick extends Series {
      *
      * @return total volume
      */
-    public float getVolume() {
-        return volume;
-    }
-
-    /**
-     * Get taker buy volume
-     *
-     * @return taker buy volume
-     */
-    public Float getTakerBuyVolume() {
-        if (takerBuyVolume < 0) return null;
-        return takerBuyVolume;
-    }
-
-    /**
-     * Get taker sell volume
-     *
-     * @return taker sell volume
-     */
-    public Float getTakerSellVolume() {
-        if (takerBuyVolume < 0) return null;
-        return volume - takerBuyVolume;
+    public Float getVolume() {
+        return (Float) dataOf(TypeData.VOLUME);
     }
 
     /**
@@ -122,54 +103,77 @@ public abstract class Candlestick extends Series {
      * @return num trades
      */
     public Integer getTrades() {
-        if (trades < 0) return null;
-        return trades;
+        return (Integer) dataOf(TypeData.TRADES);
     }
 
-    // ========================================================
-    // = ABSTRACT METHOD
-    // ========================================================
+    /**
+     * Get taker buy volume
+     *
+     * @return taker buy volume
+     */
+    public Float getTakerBuyVolume() {
+        return (Float) dataOf(TypeData.TAKER_BUY_VOLUME);
+    }
 
     /**
-     * Get candlestick data type sorting
+     * Get taker sell volume
      *
-     * @return candlestick data type sorting
+     * @return taker sell volume
      */
-    public abstract BiMap<TypeData> getDataTypeSorting();
+    public Float getTakerSellVolume() {
+        Float volume = getVolume();
+        Float takerBuyVolume = getTakerBuyVolume();
+        if (volume == null || takerBuyVolume == null) return null;
+        return volume - takerBuyVolume;
+    }
 
     // ========================================================
     // = METHOD
     // ========================================================
 
     /**
-     * Method for check if exists data type
+     * Get candlestick data type index
      *
-     * @param type Method for check if exists data type
-     * @return true if exists, false otherwise
+     * @param key type of data
+     * @return candlestick data type index. Null if not exists that data type
      */
-    public final boolean existsDataType(TypeData type) {
-        return getDataTypeSorting().
+    public Integer indexOf(TypeData key) {
+        return this.dataType.get(key);
     }
+
+    /**
+     * Get candlestick data
+     *
+     * @param key type of data
+     * @return candlestick data
+     */
+    public Number dataOf(TypeData key) {
+        Integer index = this.dataType.get(key);
+        if (index == null) return null;
+        return this.data[index];
+    }
+
     // ========================================================
     // = OVERRIDE METHOD
     // ========================================================
 
     @Override
     public String toString() {
-        return "Candlestick{" +
-                "timestamp=" + timestamp +
-                ", open=" + open +
-                ", high=" + high +
-                ", low=" + low +
-                ", close=" + close +
-                '}';
+        return "Candlestick" + generateStringRepresentation();
     }
 
     // ========================================================
     // = PRIVATE METHOD
     // ========================================================
 
-    private boolean getData(TypeData type) {
-        getDataTypeSorting().contains()
+    private String generateStringRepresentation() {
+        String format = "{%s}";
+        List<String> listData = new ArrayList<>();
+        for (TypeData type : new ArrayList<>(dataType.getSortedEnums())) {
+            int index = dataType.get(type);
+            if(index >= data.length) listData.add(type.name() + "=null");
+            else listData.add(type.name() + "=" + data[dataType.get(type)]);
+        }
+        return String.format(format, String.join(",", listData));
     }
 }

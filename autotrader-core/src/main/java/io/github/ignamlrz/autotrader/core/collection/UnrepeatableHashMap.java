@@ -8,8 +8,7 @@ import java.util.stream.Collectors;
  *
  * @param <K> Key value to search
  */
-// TODO Tests
-public abstract class UnrepeatableHashMap<K, V> implements Map<K, V> {
+public class UnrepeatableHashMap<K, V> implements Map<K, V> {
 
     // ========================================================
     // = INSTANCE FIELDS
@@ -21,6 +20,9 @@ public abstract class UnrepeatableHashMap<K, V> implements Map<K, V> {
     // = CONSTRUCTORS
     // ========================================================
 
+    /**
+     * Protected constructor of {@link UnrepeatableHashMap}
+     */
     protected UnrepeatableHashMap() {
         this.unrepeatable = new HashMap<>();
     }
@@ -77,9 +79,20 @@ public abstract class UnrepeatableHashMap<K, V> implements Map<K, V> {
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
+        // ...check any key is repeated
+        List<? extends K> repeatedKeys = m.keySet().stream()
+                .filter(this::containsKey)
+                .sorted()
+                .collect(Collectors.toUnmodifiableList());
+        if (!repeatedKeys.isEmpty())
+            throw new IllegalArgumentException(String.format(
+                    "keys '%s' already existed previously", repeatedKeys
+            ));
+
         // ...check any value is repeated
         List<? extends V> repeatedValues = m.values().stream()
                 .filter(this::containsValue)
+                .sorted()
                 .collect(Collectors.toUnmodifiableList());
         if (!repeatedValues.isEmpty())
             throw new IllegalArgumentException(String.format(

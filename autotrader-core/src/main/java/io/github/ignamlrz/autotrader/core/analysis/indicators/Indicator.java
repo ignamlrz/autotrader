@@ -36,12 +36,6 @@ public abstract class Indicator implements Analyzable, IndicatorProcessable {
      */
     public abstract IndicatorOptions getOptions();
 
-    @Override
-    public abstract boolean equals(Object obj);
-
-    @Override
-    public abstract int hashCode();
-
     // ========================================================
     // = METHODS
     // ========================================================
@@ -54,17 +48,6 @@ public abstract class Indicator implements Analyzable, IndicatorProcessable {
     public final IndicatorMetadata metadata() {
         return this.getClass().getAnnotation(IndicatorMetadata.class);
     }
-
-    // ========================================================
-    // = OVERRIDE METHODS
-    // ========================================================
-
-    @Override
-    public abstract int hashCode();
-
-    @Override
-    public abstract boolean equals(Object obj);
-
 
     // ========================================================
     // = STATIC METHODS
