@@ -1,179 +1,263 @@
 package io.github.ignamlrz.autotrader.core.repository.candlestick;
 
-import io.github.ignamlrz.autotrader.core.collection.LinkedUnrepeatableEnumMap;
-import io.github.ignamlrz.autotrader.core.repository.general.Series;
+import io.github.ignamlrz.autotrader.core.repository.exchange.ExchangeSupplier;
+import io.github.ignamlrz.autotrader.core.repository.symbol.SymbolInfo;
+import io.github.ignamlrz.autotrader.core.utilities.time.Interval;
+import org.springframework.lang.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.Optional;
 
-public class Candlestick extends Series {
-
-    // ========================================================
-    // = ENUMS
-    // ========================================================
-
-    public enum TypeData {
-        OPEN, HIGH, LOW, CLOSE, VOLUME, TRADES, TAKER_BUY_VOLUME
-    }
-
-    // ========================================================
-    // = STATIC FIELDS
-    // ========================================================
-
-    //TODO Esto es una mezcla entre el TimeSeries y el Candlestick. Realmente sería:
-    //  - Candlestick extiende de Series (Contiene la logica para extraer cualquier tipo de datos)
-    //  - TimeSeries es una clase que contiene un map<Long, ? extent Series> donde Long corresponde a un timestamp
-    //    y su valor se corresponde a una serie (contiene toda la logica para añadir en principio/medio/final una nueva serie)
-    //  - CandlestickSeries contiene un TimeSeries de Candlestic
-    static LinkedUnrepeatableEnumMap<TypeData> BINANCE_DATA_SORTING = new LinkedUnrepeatableEnumMap<>(new TypeData[]{
-            TypeData.OPEN,
-            TypeData.HIGH,
-            TypeData.LOW,
-            TypeData.CLOSE
-    });
+/**
+ * Model of a basic candlestick
+ */
+public class Candlestick {
 
     // ========================================================
     // = INSTANCE FIELDS
     // ========================================================
 
-    private final Number[] data;
-    private final LinkedUnrepeatableEnumMap<TypeData> dataType;
+    /**
+     * Exchange supplier which belong this candlestick
+     */
+    @NotNull
+    private final ExchangeSupplier exchange;
+
+    /**
+     * Symbol which belong this candlestick
+     */
+    @NotNull
+    @Size(min = 5, max = 10)
+    private final String symbol;
+
+    /**
+     * Interval which belong this candlestick
+     */
+    @NotNull
+    private final Interval interval;
+
+    /**
+     * Timestamp which belong this candlestick
+     */
+    @NotNull
+    private final Long timestamp;
+
+    /**
+     * Opening price
+     */
+    @NotNull
+    @Min(0)
+    private final Float open;
+
+    /**
+     * Highest price
+     */
+    @NotNull
+    @Min(0)
+    private final Float high;
+
+    /**
+     * Lowest price
+     */
+    @NotNull
+    @Min(0)
+    private final Float low;
+
+    /**
+     * Closing price
+     */
+    @NotNull
+    @Min(0)
+    private final Float close;
+
+    /**
+     * Volume
+     */
+    @NotNull
+    @Min(0)
+    private final Float volume;
+
+    /**
+     * Volume
+     */
+    @Min(0)
+    private final Integer trades;
+
+    /**
+     * Volume
+     */
+    @Min(0)
+    private final Float takerBuyVolume;
 
     // ========================================================
     // = CONSTRUCTORS
     // ========================================================
 
-    public Candlestick(Number[] data, LinkedUnrepeatableEnumMap<TypeData> dataType) {
-        this.data = data;
-        this.dataType = dataType;
+    public Candlestick(
+            @NotNull SymbolInfo symbol,
+            @NotNull Interval interval,
+            @NotNull Long timestamp,
+            @NotNull Float open,
+            @NotNull Float high,
+            @NotNull Float low,
+            @NotNull Float close,
+            @NotNull Float volume,
+            @Nullable Integer trades,
+            @Nullable Float takerBuyVolume
+    ) {
+        this.exchange = symbol.getExchange();
+        this.symbol = symbol.getSymbol();
+        this.interval = interval;
+        this.timestamp = timestamp;
+        this.open = Optional.of(open).get();
+        this.high = Optional.of(high).get();
+        this.low = Optional.of(low).get();
+        this.close = Optional.of(close).get();
+        this.volume = Optional.of(volume).get();
+        this.trades = trades;
+        this.takerBuyVolume = takerBuyVolume;
     }
 
     // ========================================================
-    // = GETTER/SETTER
+    // = GETTERS
     // ========================================================
 
     /**
-     * Get open price
+     * Getter of opening price
      *
-     * @return open price
+     * @return opening price
      */
-    public Float getOpen() {
-        return (Float) dataOf(TypeData.OPEN);
+    public float getOpen() {
+        return open;
     }
 
     /**
-     * Get high price
+     * Getter of the highest price
      *
-     * @return high price
+     * @return highest price
      */
-    public Float getHigh() {
-        return (Float) dataOf(TypeData.HIGH);
+    public float getHigh() {
+        return high;
     }
 
     /**
-     * Get low price
+     * Getter of the lowest price
      *
-     * @return low price
+     * @return lowest price
      */
-    public Float getLow() {
-        return (Float) dataOf(TypeData.LOW);
+    public float getLow() {
+        return low;
     }
 
     /**
-     * Get close price
+     * Getter of closing price
      *
-     * @return close price
+     * @return closing price
      */
-    public Float getClose() {
-        return (Float) dataOf(TypeData.CLOSE);
+    public float getClose() {
+        return close;
     }
 
     /**
-     * Get total volume
+     * Getter of volume
      *
-     * @return total volume
+     * @return volume
      */
-    public Float getVolume() {
-        return (Float) dataOf(TypeData.VOLUME);
+    public float getVolume() {
+        return volume;
     }
 
     /**
-     * Get num trades
+     * Getter number of trades
      *
-     * @return num trades
+     * @return number of trades
      */
-    public Integer getTrades() {
-        return (Integer) dataOf(TypeData.TRADES);
+    public @Nullable Integer getTrades() {
+        return trades;
     }
 
     /**
-     * Get taker buy volume
+     * Getter taker buy volume
      *
      * @return taker buy volume
      */
-    public Float getTakerBuyVolume() {
-        return (Float) dataOf(TypeData.TAKER_BUY_VOLUME);
+    public @Nullable Float getTakerBuyVolume() {
+        return takerBuyVolume;
     }
 
     /**
-     * Get taker sell volume
+     * Getter taker sell volume
      *
      * @return taker sell volume
      */
-    public Float getTakerSellVolume() {
-        Float volume = getVolume();
-        Float takerBuyVolume = getTakerBuyVolume();
-        if (volume == null || takerBuyVolume == null) return null;
-        return volume - takerBuyVolume;
-    }
-
-    // ========================================================
-    // = METHOD
-    // ========================================================
-
-    /**
-     * Get candlestick data type index
-     *
-     * @param key type of data
-     * @return candlestick data type index. Null if not exists that data type
-     */
-    public Integer indexOf(TypeData key) {
-        return this.dataType.get(key);
+    public @Nullable Float getTakerSellVolume() {
+        if (this.takerBuyVolume == null) return null;
+        return this.volume - this.takerBuyVolume;
     }
 
     /**
-     * Get candlestick data
+     * Getter quote volume
      *
-     * @param key type of data
-     * @return candlestick data
+     * @return quote volume
      */
-    public Number dataOf(TypeData key) {
-        Integer index = this.dataType.get(key);
-        if (index == null) return null;
-        return this.data[index];
+    public @Nullable Float getQuoteVolume() {
+        return volume / avgPrice();
+    }
+
+    /**
+     * Getter taker buy quote volume
+     *
+     * @return taker buy quote volume
+     */
+    public @Nullable Float getTakerBuyQuoteVolume() {
+        if (this.takerBuyVolume == null) return null;
+        return this.takerBuyVolume / avgPrice();
+    }
+
+    /**
+     * Getter taker sell quote volume
+     *
+     * @return taker sell quote volume
+     */
+    public @Nullable Float getTakerSellQuoteVolume() {
+        Float takerSellVolume = this.getTakerSellVolume();
+        if (takerSellVolume == null) return null;
+        return takerSellVolume / avgPrice();
     }
 
     // ========================================================
-    // = OVERRIDE METHOD
+    // = METHODS
     // ========================================================
 
-    @Override
-    public String toString() {
-        return "Candlestick" + generateStringRepresentation();
+    /**
+     * Method for calculate average price of this candlestick. Do the operation (high + low + open * 3 + close * 3) / 8
+     *
+     * @return average price
+     */
+    public float avgPrice() {
+        return (this.high + this.low + this.open * 3f + this.close * 3f) * 0.125f;
     }
 
-    // ========================================================
-    // = PRIVATE METHOD
-    // ========================================================
+    /**
+     * Method for calculate taker buy factor
+     *
+     * @return factor between 0 - 1 of taker buy
+     */
+    public @Nullable Float takerBuyFactor() {
+        if (this.takerBuyVolume == null) return null;
+        return this.takerBuyVolume / this.volume;
+    }
 
-    private String generateStringRepresentation() {
-        String format = "{%s}";
-        List<String> listData = new ArrayList<>();
-        for (TypeData type : new ArrayList<>(dataType.getSortedEnums())) {
-            int index = dataType.get(type);
-            if(index >= data.length) listData.add(type.name() + "=null");
-            else listData.add(type.name() + "=" + data[dataType.get(type)]);
-        }
-        return String.format(format, String.join(",", listData));
+    /**
+     * Method for calculate taker sell factor
+     *
+     * @return factor between 0 - 1 of taker sell
+     */
+    public @Nullable Float takerSellFactor() {
+        Float factorTakerBuy = takerBuyFactor();
+        if (factorTakerBuy == null) return null;
+        return 1f - factorTakerBuy;
     }
 }

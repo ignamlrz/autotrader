@@ -3,19 +3,16 @@ package io.github.ignamlrz.autotrader.core.analysis.indicators.ema;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.ignamlrz.autotrader.core.analysis.AnalysisResult;
-import io.github.ignamlrz.autotrader.core.analysis.indicators.IndicatorCategory;
-import io.github.ignamlrz.autotrader.core.analysis.indicators.IndicatorType;
-import io.github.ignamlrz.autotrader.core.model.market.ChartModel;
+import io.github.ignamlrz.autotrader.core.analysis.indicators.*;
+import io.github.ignamlrz.autotrader.core.annotations.IndicatorMetadata;
+import io.github.ignamlrz.autotrader.core.repository.candlestick.Candlestick;
 import io.github.ignamlrz.autotrader.core.utilities.FloatUtils;
 import io.github.ignamlrz.autotrader.core.utilities.conversion.ConversionUtils;
-import io.github.ignamlrz.autotrader.core.analysis.indicators.Indicator;
-import io.github.ignamlrz.autotrader.core.analysis.indicators.IndicatorInput;
-import io.github.ignamlrz.autotrader.core.analysis.indicators.IndicatorOutput;
-import io.github.ignamlrz.autotrader.core.annotations.IndicatorMetadata;
 
-import javax.naming.NameNotFoundException;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Exponential Moving Average indicator
@@ -103,13 +100,9 @@ public class EMAIndicator extends Indicator {
     }
 
     @Override
-    public <T extends ChartModel> IndicatorOutput run(T chart) {
-        Float[] reals;
-        try {
-            reals = FloatUtils.arrayOf(chart.dataByTarget(this.options.getTarget()));
-        } catch (NameNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    public IndicatorOutput run(List<Candlestick> candlesticks) {
+        IndicatorTarget target = this.options.getTarget();
+        Float[] reals = FloatUtils.arrayOf(candlesticks.stream().map(target::of).collect(Collectors.toList()));
         EMAIndicatorInput input = new EMAIndicatorInput(reals);
         return run(input);
     }

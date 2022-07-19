@@ -1,4 +1,4 @@
-package io.github.ignamlrz.autotrader.core.model.market;
+package io.github.ignamlrz.autotrader.core.repository.candlestick;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.ignamlrz.autotrader.core.TestUtils;

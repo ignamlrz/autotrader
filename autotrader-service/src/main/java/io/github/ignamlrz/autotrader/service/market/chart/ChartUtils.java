@@ -1,6 +1,6 @@
 package io.github.ignamlrz.autotrader.service.market.chart;
 
-import io.github.ignamlrz.autotrader.core.model.market.Candlestick;
+import io.github.ignamlrz.autotrader.core.repository.candlestick.Candlestick;
 import io.github.ignamlrz.autotrader.core.utilities.time.Interval;
 import io.github.ignamlrz.autotrader.core.utilities.time.Timeframe;
 
@@ -30,7 +30,7 @@ public final class ChartUtils {
         Float low = (Float) numbers[ChartData.Order.LOW.ordinal()];
         Float close = (Float) numbers[ChartData.Order.CLOSE.ordinal()];
         Float volume = (Float) numbers[ChartData.Order.VOLUME.ordinal()];
-        return new Candlestick(open, high, low, close, volume, timeframe);
+        return new Candlestick(open, high, low, close, volume, 1, 5f);
     }
 
     /**

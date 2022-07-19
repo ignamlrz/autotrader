@@ -1,8 +1,7 @@
 package io.github.ignamlrz.autotrader.service.market.chart;
 
-import io.github.ignamlrz.autotrader.core.model.market.Candlestick;
+import io.github.ignamlrz.autotrader.core.repository.candlestick.Candlestick;
 import io.github.ignamlrz.autotrader.core.utilities.time.Interval;
-import io.github.ignamlrz.autotrader.core.utilities.time.Timeframe;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,8 @@ class ChartModelUtilsTest {
             LOW_PRICE,
             CLOSE_PRICE,
             VOLUME,
-            new Timeframe(TIMESTAMP, TIMESTAMP + INTERVAL.toMillis() - 1)
+            1,
+            5f
     );
 
     @Test
@@ -45,8 +45,6 @@ class ChartModelUtilsTest {
         // ...test correct creation
         Candlestick candlestick = ChartUtils.from(numbers, INTERVAL, TIMESTAMP);
 
-        assertEquals(TIMESTAMP, candlestick.getTimeframe().getOpen());
-        assertEquals(TIMESTAMP + INTERVAL.toMillis() - 1, candlestick.getTimeframe().getClose());
         assertEquals(OPEN_PRICE, candlestick.getOpen());
         assertEquals(HIGH_PRICE, candlestick.getHigh());
         assertEquals(LOW_PRICE, candlestick.getLow());
