@@ -1,9 +1,11 @@
 package io.github.ignamlrz.autotrader.core.repository.exchange;
 
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import javax.validation.constraints.NotNull;
 
+@Document
 public class Exchange {
 
     // ========================================================
@@ -14,7 +16,7 @@ public class Exchange {
      * Exchange supplier
      */
     @MongoId
-    private final ExchangeSupplier name;
+    private final ExchangeSupplier supplier;
 
     /**
      * Exchange status
@@ -29,10 +31,10 @@ public class Exchange {
     /**
      * Constructor of a {@link Exchange}
      *
-     * @param name of this exchange
+     * @param supplier of this exchange
      */
-    public Exchange(ExchangeSupplier name) {
-        this.name = name;
+    public Exchange(ExchangeSupplier supplier) {
+        this.supplier = supplier;
         this.status = ExchangeStatus.MEDIUM;
     }
 
@@ -45,8 +47,8 @@ public class Exchange {
      *
      * @return name exchange
      */
-    public ExchangeSupplier getName() {
-        return name;
+    public ExchangeSupplier getSupplier() {
+        return supplier;
     }
 
     /**
@@ -74,7 +76,7 @@ public class Exchange {
     @Override
     public String toString() {
         return "Exchange{" +
-                "name=" + name +
+                "name=" + supplier +
                 ", status=" + status +
                 '}';
     }

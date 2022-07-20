@@ -1,13 +1,15 @@
 package io.github.ignamlrz.autotrader.core.repository.candlestick;
 
-import io.github.ignamlrz.autotrader.core.repository.exchange.ExchangeSupplier;
-import io.github.ignamlrz.autotrader.core.repository.symbol.SymbolInfo;
+import io.github.ignamlrz.autotrader.core.repository.symbol.Symbol;
 import io.github.ignamlrz.autotrader.core.utilities.time.Interval;
+import io.github.ignamlrz.autotrader.core.utilities.time.Timeframe;
+import io.github.ignamlrz.autotrader.core.utilities.time.TimeframeUtils;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.Optional;
 
 /**
@@ -20,28 +22,25 @@ public class Candlestick {
     // ========================================================
 
     /**
-     * Exchange supplier which belong this candlestick
-     */
-    @NotNull
-    private final ExchangeSupplier exchange;
-
-    /**
      * Symbol which belong this candlestick
      */
     @NotNull
-    @Size(min = 5, max = 10)
-    private final String symbol;
+    @Indexed
+    @DBRef
+    private final Symbol symbol;
 
     /**
      * Interval which belong this candlestick
      */
     @NotNull
+    @Indexed
     private final Interval interval;
 
     /**
      * Timestamp which belong this candlestick
      */
     @NotNull
+    @Indexed
     private final Long timestamp;
 
     /**
@@ -96,7 +95,7 @@ public class Candlestick {
     // ========================================================
 
     public Candlestick(
-            @NotNull SymbolInfo symbol,
+            @NotNull Symbol symbol,
             @NotNull Interval interval,
             @NotNull Long timestamp,
             @NotNull Float open,
@@ -107,8 +106,7 @@ public class Candlestick {
             @Nullable Integer trades,
             @Nullable Float takerBuyVolume
     ) {
-        this.exchange = symbol.getExchange();
-        this.symbol = symbol.getSymbol();
+        this.symbol = symbol;
         this.interval = interval;
         this.timestamp = timestamp;
         this.open = Optional.of(open).get();
@@ -125,7 +123,43 @@ public class Candlestick {
     // ========================================================
 
     /**
-     * Getter of opening price
+     * Getter symbol which belong this candlestick
+     *
+     * @return associated symbol
+     */
+    public Symbol getSymbol() {
+        return symbol;
+    }
+
+    /**
+     * Getter interval which belong this candlestick
+     *
+     * @return associated interval
+     */
+    public Interval getInterval() {
+        return interval;
+    }
+
+    /**
+     * Getter opening timestamp
+     *
+     * @return opening timestamp
+     */
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * Getter timeframe
+     *
+     * @return timeframe
+     */
+    public Timeframe getTimeframe() {
+        return TimeframeUtils.of(timestamp, interval);
+    }
+
+    /**
+     * Getter opening price
      *
      * @return opening price
      */
@@ -152,7 +186,7 @@ public class Candlestick {
     }
 
     /**
-     * Getter of closing price
+     * Getter closing price
      *
      * @return closing price
      */
@@ -161,9 +195,9 @@ public class Candlestick {
     }
 
     /**
-     * Getter of volume
+     * Getter total volume
      *
-     * @return volume
+     * @return total volume
      */
     public float getVolume() {
         return volume;
