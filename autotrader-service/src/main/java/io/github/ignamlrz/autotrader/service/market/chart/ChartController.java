@@ -1,64 +1,64 @@
-package io.github.ignamlrz.autotrader.service.market.chart;
-
-import io.github.ignamlrz.autotrader.core.utilities.time.Interval;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
-
-@Tag(name = "chart", description = "Manage charts")
-@RestController
-@RequestMapping("status")
-public class ChartController {
-
-    @Autowired
-    ChartService chartService;
-
-    @GetMapping("insert")
-    public Mono<Chart> serviceBinance(@RequestParam Interval interval, @RequestParam  String baseAsset, @RequestParam  String quoteAsset) {
-//        PairAsset pairAsset = new PairAsset(baseAsset, quoteAsset);
-//        List<BinanceCandlestick> data = new ArrayList<>();
-//        float previousPrice = 1.f;
-//        for (int i = 0; i < 10; i++) {
-//            float percentage = 1 - ((randomG(4) - 0.5f) * 10.f) * 0.01f;
-//            float nextPrice = previousPrice * percentage;
-//            float maxValue = Math.max(previousPrice, nextPrice) * (1f + (float) Math.random() * 0.05f);
-//            float minvalue = Math.min(previousPrice, nextPrice) * (1f - (float) Math.random() * 0.05f);
-//            BinanceCandlestick bc = new BinanceCandlestick(
-//                    previousPrice,
-//                    maxValue,
-//                    minvalue,
-//                    nextPrice,
-//                    (float) Math.random() * 1_000_000f,
-//                    new Timeframe(i * interval.toMillis(), (i + 1) * interval.toMillis() - 1),
-//                    (int) (Math.random() * 1000),
-//                    (float) Math.random() * 1_000_000f,
-//                    (float) Math.random() * 1_000_000f,
-//                    (float) Math.random() * 1_000_000f
-//            );
-//            previousPrice = nextPrice;
+//package io.github.ignamlrz.autotrader.service.market.chart;
 //
-//            data.add(bc);
+//import io.github.ignamlrz.autotrader.core.utilities.time.Interval;
+//import io.swagger.v3.oas.annotations.tags.Tag;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.web.bind.annotation.GetMapping;
+//import org.springframework.web.bind.annotation.RequestMapping;
+//import org.springframework.web.bind.annotation.RequestParam;
+//import org.springframework.web.bind.annotation.RestController;
+//import reactor.core.publisher.Mono;
+//
+//@Tag(name = "chart", description = "Manage charts")
+//@RestController
+//@RequestMapping("status")
+//public class ChartController {
+//
+//    @Autowired
+//    ChartService chartService;
+//
+//    @GetMapping("insert")
+//    public Mono<Chart> serviceBinance(@RequestParam Interval interval, @RequestParam  String baseAsset, @RequestParam  String quoteAsset) {
+////        PairAsset pairAsset = new PairAsset(baseAsset, quoteAsset);
+////        List<BinanceCandlestick> data = new ArrayList<>();
+////        float previousPrice = 1.f;
+////        for (int i = 0; i < 10; i++) {
+////            float percentage = 1 - ((randomG(4) - 0.5f) * 10.f) * 0.01f;
+////            float nextPrice = previousPrice * percentage;
+////            float maxValue = Math.max(previousPrice, nextPrice) * (1f + (float) Math.random() * 0.05f);
+////            float minvalue = Math.min(previousPrice, nextPrice) * (1f - (float) Math.random() * 0.05f);
+////            BinanceCandlestick bc = new BinanceCandlestick(
+////                    previousPrice,
+////                    maxValue,
+////                    minvalue,
+////                    nextPrice,
+////                    (float) Math.random() * 1_000_000f,
+////                    new Timeframe(i * interval.toMillis(), (i + 1) * interval.toMillis() - 1),
+////                    (int) (Math.random() * 1000),
+////                    (float) Math.random() * 1_000_000f,
+////                    (float) Math.random() * 1_000_000f,
+////                    (float) Math.random() * 1_000_000f
+////            );
+////            previousPrice = nextPrice;
+////
+////            data.add(bc);
+////        }
+////
+////        Chart c = chartService.insert(new BinanceChartModel(
+////                pairAsset,
+////                interval,
+////                data
+////        ));
+////        return Mono.just(c);
+//        return null;
+//    }
+//
+//    // v is the number of times random is summed and should be over >= 1
+//    private float randomG(int v){
+//        float r = 0;
+//        for(int i = 0; i < v; i++){
+//            r += Math.random();
 //        }
-//
-//        Chart c = chartService.insert(new BinanceChartModel(
-//                pairAsset,
-//                interval,
-//                data
-//        ));
-//        return Mono.just(c);
-        return null;
-    }
-
-    // v is the number of times random is summed and should be over >= 1
-    private float randomG(int v){
-        float r = 0;
-        for(int i = 0; i < v; i++){
-            r += Math.random();
-        }
-        return r / v;
-    }
-}
+//        return r / v;
+//    }
+//}

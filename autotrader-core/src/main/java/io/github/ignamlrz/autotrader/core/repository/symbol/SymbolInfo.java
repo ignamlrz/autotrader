@@ -2,6 +2,7 @@ package io.github.ignamlrz.autotrader.core.repository.symbol;
 
 import io.github.ignamlrz.autotrader.core.repository.exchange.Exchange;
 import io.github.ignamlrz.autotrader.core.repository.exchange.ExchangeSupplier;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 public class SymbolInfo {
 
@@ -90,6 +91,7 @@ public class SymbolInfo {
      *
      * @return symbol pair
      */
+    @MongoId
     public String getSymbol() {
         return base + quote;
     }

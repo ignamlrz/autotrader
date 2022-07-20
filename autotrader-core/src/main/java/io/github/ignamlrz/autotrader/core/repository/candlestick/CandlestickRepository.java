@@ -1,8 +1,10 @@
 package io.github.ignamlrz.autotrader.core.repository.candlestick;
 
 import org.bson.types.ObjectId;
-import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-public interface CandlestickRepository extends Repository<Candlestick, ObjectId> {
+@Repository
+public interface CandlestickRepository extends CrudRepository<Candlestick, ObjectId> {
 
 }

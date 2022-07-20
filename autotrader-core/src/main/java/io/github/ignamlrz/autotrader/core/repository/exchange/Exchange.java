@@ -1,5 +1,9 @@
 package io.github.ignamlrz.autotrader.core.repository.exchange;
 
+import org.springframework.data.mongodb.core.mapping.MongoId;
+
+import javax.validation.constraints.NotNull;
+
 public class Exchange {
 
     // ========================================================
@@ -9,11 +13,13 @@ public class Exchange {
     /**
      * Exchange supplier
      */
+    @MongoId
     private final ExchangeSupplier name;
 
     /**
      * Exchange status
      */
+    @NotNull
     private ExchangeStatus status;
 
     // ========================================================
